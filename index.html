@@ -20,6 +20,70 @@
     <div id="modal-producto" class="modal-producto">
         <div class="modal-contenido"></div>
     </div>
+    
+    <!-- Modal de Login -->
+    <div id="modal-login" class="modal-login">
+        <div class="modal-login-contenido">
+            <span class="cerrar-login" onclick="cerrarModalLogin()">&times;</span>
+            <h2>Iniciar Sesión</h2>
+            <form id="login-form" onsubmit="iniciarSesion(event)">
+                <div class="campo-login">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="campo-login">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-login">Iniciar Sesión</button>
+            </form>
+            <p class="registro-link">¿No tienes cuenta? <a href="#" onclick="mostrarRegistro(); return false;">Regístrate aquí</a></p>
+        </div>
+    </div>
+
+    <!-- Modal de Registro -->
+    <div id="modal-registro" class="modal-login">
+        <div class="modal-login-contenido">
+            <span class="cerrar-login" onclick="cerrarModalRegistro()">&times;</span>
+            <h2>Registro</h2>
+            <form id="registro-form" onsubmit="registrarUsuario(event)">
+                <div class="campo-login">
+                    <label for="nombre-registro">Nombre:</label>
+                    <input type="text" id="nombre-registro" required>
+                </div>
+                <div class="campo-login">
+                    <label for="email-registro">Email:</label>
+                    <input type="email" id="email-registro" required>
+                </div>
+                <div class="campo-login">
+                    <label for="password-registro">Contraseña:</label>
+                    <input type="password" id="password-registro" required>
+                </div>
+                <button type="submit" class="btn-login">Registrarse</button>
+            </form>
+            <p class="registro-link">¿Ya tienes cuenta? <a href="#" onclick="mostrarLogin(); return false;">Inicia sesión aquí</a></p>
+        </div>
+    </div>
+
+    <!-- Modal del Carrito -->
+    <div id="modal-carrito" class="modal-carrito">
+        <div class="modal-carrito-contenido">
+            <span class="cerrar-carrito" onclick="cerrarCarrito()">&times;</span>
+            <h2>Tu Carrito</h2>
+            <div id="carrito-items" class="carrito-items">
+                <!-- Los items se cargarán dinámicamente -->
+            </div>
+            <div class="carrito-total">
+                <span>Total:</span>
+                <span id="carrito-total">$0</span>
+            </div>
+            <div class="carrito-botones">
+                <button onclick="vaciarCarrito()" class="btn-vaciar">Vaciar Carrito</button>
+                <button onclick="finalizarCompra()" class="btn-comprar">Finalizar Compra</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Header con logo centrado -->
     <header>
         <a href="#" class="logo">LA SUREÑA DECO</a>
@@ -35,10 +99,10 @@
             </ul>
         </nav>
         <div class="user-cart-container">
-            <a href="#" class="user-icon" onclick="mostrarModalLogin(); return false;">
-                        <i class="fas fa-user"></i>
-                    </a>
-            <a href="#" onclick="abrirCarrito(); return false;" class="cart-icon">
+            <a href="#" class="user-icon" onclick="event.preventDefault(); event.stopPropagation(); mostrarModalLogin();">
+                <i class="fas fa-user"></i>
+            </a>
+            <a href="#" class="cart-icon" onclick="event.preventDefault(); event.stopPropagation(); abrirCarrito();">
                 <i class="fas fa-shopping-cart"></i>
                 <span id="contador-carrito" class="cart-count">0</span>
             </a>

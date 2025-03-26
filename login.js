@@ -1,96 +1,60 @@
 // Variables globales
-let usuarioActual = null;
+let usuarioActual = JSON.parse(localStorage.getItem('usuarioActual')) || null;
 
-// Función para mostrar el modal de login
+// Funciones para mostrar/ocultar modales
 function mostrarModalLogin() {
-    const modalHTML = `
-        <div id="modal-login" class="modal-login">
-            <div class="modal-contenido-login">
-                <button class="btn-cerrar" onclick="cerrarModalLogin()">&times;</button>
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="cambiarTab('login')">Iniciar Sesión</button>
-                    <button class="tab-btn" onclick="cambiarTab('registro')">Registrarse</button>
-                </div>
-                <div id="tab-login" class="tab-content active">
-                    <form id="form-login" onsubmit="iniciarSesion(event)">
-                        <input type="email" placeholder="Email" required>
-                        <input type="password" placeholder="Contraseña" required>
-                        <button type="submit">Iniciar Sesión</button>
-                    </form>
-                </div>
-                <div id="tab-registro" class="tab-content">
-                    <form id="form-registro" onsubmit="registrarUsuario(event)">
-                        <input type="text" placeholder="Nombre" required>
-                        <input type="email" placeholder="Email" required>
-                        <input type="password" placeholder="Contraseña" required>
-                        <button type="submit">Registrarse</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    cerrarCarrito(); // Cerrar el carrito si está abierto
+    document.getElementById('modal-login').classList.add('mostrar');
 }
 
-// Función para cerrar el modal de login
 function cerrarModalLogin() {
-    const modal = document.getElementById('modal-login');
-    if (modal) {
-        modal.remove();
-    }
+    document.getElementById('modal-login').classList.remove('mostrar');
 }
 
-// Función para cambiar entre tabs
-function cambiarTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-    
-    document.querySelector(`[onclick="cambiarTab('${tab}')"]`).classList.add('active');
-    document.getElementById(`tab-${tab}`).classList.add('active');
+function mostrarModalRegistro() {
+    cerrarModalLogin();
+    document.getElementById('modal-registro').classList.add('mostrar');
+}
+
+function cerrarModalRegistro() {
+    document.getElementById('modal-registro').classList.remove('mostrar');
+}
+
+function mostrarRegistro() {
+    document.getElementById('modal-login').classList.remove('mostrar');
+    setTimeout(() => {
+        document.getElementById('modal-registro').classList.add('mostrar');
+    }, 300);
+}
+
+function mostrarLogin() {
+    document.getElementById('modal-registro').classList.remove('mostrar');
+    setTimeout(() => {
+        document.getElementById('modal-login').classList.add('mostrar');
+    }, 300);
 }
 
 // Función para iniciar sesión
 async function iniciarSesion(event) {
     event.preventDefault();
     
-    const form = event.target;
-    const email = form.querySelector('input[type="email"]').value;
-    const password = form.querySelector('input[type="password"]').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
     
-    try {
-        // Obtener usuarios del localStorage
-        const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
-        
-        // Buscar usuario
-        const usuario = usuarios.find(u => u.email === email && u.password === password);
-        
-        if (usuario) {
-            // Guardar sesión
-            usuarioActual = {
-                id: usuario.id,
-                nombre: usuario.nombre,
-                email: usuario.email
-            };
-            localStorage.setItem('usuarioActual', JSON.stringify(usuarioActual));
-            
-            // Actualizar interfaz
-            actualizarInterfazUsuario();
-            
-            // Cerrar modal
-            cerrarModalLogin();
-            
-            alert('¡Bienvenido de vuelta!');
-        } else {
-            alert('Email o contraseña incorrectos');
-        }
-    } catch (error) {
-        console.error('Error al iniciar sesión:', error);
-        alert('Error al iniciar sesión');
+    const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+    const usuario = usuarios.find(u => u.email === email && u.password === password);
+    
+    if (usuario) {
+        usuarioActual = {
+            nombre: usuario.nombre,
+            email: usuario.email
+        };
+        localStorage.setItem('usuarioActual', JSON.stringify(usuarioActual));
+        actualizarInterfazUsuario();
+        cerrarModalLogin();
+        mostrarMensaje('¡Bienvenido/a ' + usuario.nombre + '!', 'success');
+    } else {
+        mostrarMensaje('Email o contraseña incorrectos', 'error');
     }
 }
 
@@ -98,53 +62,35 @@ async function iniciarSesion(event) {
 async function registrarUsuario(event) {
     event.preventDefault();
     
-    const form = event.target;
-    const nombre = form.querySelector('input[type="text"]').value;
-    const email = form.querySelector('input[type="email"]').value;
-    const password = form.querySelector('input[type="password"]').value;
+    const nombre = document.getElementById('nombre-registro').value;
+    const email = document.getElementById('email-registro').value;
+    const password = document.getElementById('password-registro').value;
     
-    try {
-        // Obtener usuarios existentes
-        const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
-        
-        // Verificar si el email ya está registrado
-        if (usuarios.some(u => u.email === email)) {
-            alert('Este email ya está registrado');
-            return;
-        }
-        
-        // Crear nuevo usuario
-        const nuevoUsuario = {
-            id: Date.now(),
-            nombre,
-            email,
-            password,
-            fechaRegistro: new Date().toISOString()
-        };
-        
-        // Guardar usuario
-        usuarios.push(nuevoUsuario);
-        localStorage.setItem('usuarios', JSON.stringify(usuarios));
-        
-        // Iniciar sesión automáticamente
-        usuarioActual = {
-            id: nuevoUsuario.id,
-            nombre: nuevoUsuario.nombre,
-            email: nuevoUsuario.email
-        };
-        localStorage.setItem('usuarioActual', JSON.stringify(usuarioActual));
-        
-        // Actualizar interfaz
-        actualizarInterfazUsuario();
-        
-        // Cerrar modal
-        cerrarModalLogin();
-        
-        alert('¡Registro exitoso!');
-    } catch (error) {
-        console.error('Error al registrar usuario:', error);
-        alert('Error al registrar usuario');
+    const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+    
+    if (usuarios.some(u => u.email === email)) {
+        mostrarMensaje('Este email ya está registrado', 'error');
+        return;
     }
+    
+    const nuevoUsuario = {
+        nombre,
+        email,
+        password
+    };
+    
+    usuarios.push(nuevoUsuario);
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
+    
+    usuarioActual = {
+        nombre: nuevoUsuario.nombre,
+        email: nuevoUsuario.email
+    };
+    localStorage.setItem('usuarioActual', JSON.stringify(usuarioActual));
+    
+    actualizarInterfazUsuario();
+    cerrarModalRegistro();
+    mostrarMensaje('¡Registro exitoso! Bienvenido/a ' + nombre, 'success');
 }
 
 // Función para cerrar sesión
@@ -152,53 +98,124 @@ function cerrarSesion() {
     usuarioActual = null;
     localStorage.removeItem('usuarioActual');
     actualizarInterfazUsuario();
+    mostrarMensaje('Has cerrado sesión', 'info');
 }
 
-// Función para actualizar la interfaz según el estado de la sesión
+// Función para actualizar la interfaz según el estado del usuario
 function actualizarInterfazUsuario() {
     const userIcon = document.querySelector('.user-icon');
     
     if (usuarioActual) {
-        // Usuario logueado
         userIcon.innerHTML = `
             <div class="user-menu-container">
-                <i class="fas fa-user"></i>
+                <i class="fas fa-user-circle"></i>
                 <div class="user-menu">
                     <span class="user-name">${usuarioActual.nombre}</span>
-                    <a href="#" onclick="verPerfil()">Mi Perfil</a>
-                    <a href="#" onclick="verPedidos()">Mis Pedidos</a>
-                    <a href="#" onclick="cerrarSesion()">Cerrar Sesión</a>
+                    <a href="#" onclick="cerrarSesion(); return false;">Cerrar sesión</a>
                 </div>
             </div>
         `;
     } else {
-        // Usuario no logueado
         userIcon.innerHTML = '<i class="fas fa-user"></i>';
-        userIcon.onclick = () => mostrarModalLogin();
     }
 }
 
-// Función para ver perfil (placeholder)
-function verPerfil() {
-    alert('Función de perfil en desarrollo');
+// Función para mostrar mensajes
+function mostrarMensaje(mensaje, tipo) {
+    const div = document.createElement('div');
+    div.className = `mensaje mensaje-${tipo}`;
+    div.textContent = mensaje;
+    
+    document.body.appendChild(div);
+    
+    setTimeout(() => {
+        div.classList.add('mostrar');
+    }, 100);
+    
+    setTimeout(() => {
+        div.classList.remove('mostrar');
+        setTimeout(() => {
+            div.remove();
+        }, 300);
+    }, 3000);
 }
 
-// Función para ver pedidos (placeholder)
-function verPedidos() {
-    alert('Función de pedidos en desarrollo');
-}
+// Estilos para los mensajes
+const styles = document.createElement('style');
+styles.textContent = `
+    .mensaje {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 2rem;
+        border-radius: 4px;
+        color: white;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+        z-index: 2100;
+    }
+    
+    .mensaje.mostrar {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .mensaje-success {
+        background-color: #4caf50;
+    }
+    
+    .mensaje-error {
+        background-color: #f44336;
+    }
+    
+    .mensaje-info {
+        background-color: #2196f3;
+    }
+    
+    .user-menu-container {
+        position: relative;
+        cursor: pointer;
+    }
+    
+    .user-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 1rem;
+        min-width: 150px;
+        display: none;
+    }
+    
+    .user-menu-container:hover .user-menu {
+        display: block;
+    }
+    
+    .user-name {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 500;
+    }
+    
+    .user-menu a {
+        color: #666;
+        text-decoration: none;
+        display: block;
+        padding: 0.5rem 0;
+    }
+    
+    .user-menu a:hover {
+        color: #8b7355;
+    }
+`;
 
-// Inicializar al cargar la página
+document.head.appendChild(styles);
+
+// Inicializar la interfaz cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    // Verificar si hay una sesión activa
-    const sesionGuardada = localStorage.getItem('usuarioActual');
-    if (sesionGuardada) {
-        try {
-            usuarioActual = JSON.parse(sesionGuardada);
-            actualizarInterfazUsuario();
-        } catch (error) {
-            console.error('Error al cargar la sesión:', error);
-            localStorage.removeItem('usuarioActual');
-        }
-    }
+    actualizarInterfazUsuario();
 }); 

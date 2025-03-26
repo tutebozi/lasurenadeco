@@ -34,64 +34,73 @@
     </div>
 
     <!-- Modal para Agregar/Editar Producto -->
-    <div class="modal-producto" id="modal-producto">
+    <div id="modal-producto" class="modal-producto">
         <div class="modal-contenido">
-            <span class="cerrar" onclick="cerrarModalProducto()">&times;</span>
+            <span class="cerrar" onclick="cerrarModal()">&times;</span>
             <h2>Producto</h2>
-            <form id="form-producto">
-                <div class="form-group">
-                    <label for="nombre">Nombre del producto</label>
+            <form id="formulario-producto" onsubmit="guardarProducto(event)">
+                <div class="campo">
+                    <label for="nombre">Nombre del producto:</label>
                     <input type="text" id="nombre" name="nombre" required>
                 </div>
-                <div class="form-group">
-                    <label for="precio">Precio</label>
-                    <input type="number" id="precio" name="precio" step="0.01" required>
+                <div class="campo">
+                    <label for="precio">Precio:</label>
+                    <input type="number" id="precio" name="precio" required>
                 </div>
-                <div class="form-group">
-                    <label for="descripcion">Descripción</label>
+                <div class="campo">
+                    <label for="descripcion">Descripción:</label>
                     <textarea id="descripcion" name="descripcion" required></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="categoria">Categoría</label>
-                    <input type="text" id="categoria" name="categoria" required>
+                <div class="campo">
+                    <label for="categoria">Categoría:</label>
+                    <select id="categoria" name="categoria" required>
+                        <option value="">Selecciona una categoría</option>
+                        <option value="MESA">MESA</option>
+                        <option value="DECORACIÓN">DECORACIÓN</option>
+                        <option value="HOGAR">HOGAR</option>
+                        <option value="COCINA">COCINA</option>
+                        <option value="BAÑO">BAÑO</option>
+                        <option value="AROMAS">AROMAS</option>
+                        <option value="REGALOS">REGALOS</option>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <label for="stock">Stock</label>
+                <div class="campo">
+                    <label for="stock">Stock:</label>
                     <input type="number" id="stock" name="stock" required>
                 </div>
-                <div class="imagenes-container">
-                    <div class="imagen-principal">
-                        <label for="imagen-principal">Imagen Principal</label>
-                        <input type="file" id="imagen-principal" accept="image/*">
-                        <div id="preview-imagen-principal" class="imagen-preview"></div>
-                    </div>
-                    <div class="imagenes-adicionales">
-                        <h3>Imágenes Adicionales</h3>
-                        <div class="imagen-adicional">
-                            <label for="imagen-2">Imagen 2</label>
-                            <input type="file" id="imagen-2" class="imagen-adicional-input" accept="image/*">
-                            <div id="preview-imagen-2" class="imagen-preview"></div>
+                <div class="campo">
+                    <label>Imágenes del producto:</label>
+                    <div class="galeria-imagenes">
+                        <div class="imagen-item">
+                            <label>Imagen 1:</label>
+                            <input type="file" accept="image/*" onchange="previewImagen(this, 'preview-1')" data-index="0">
+                            <img id="preview-1" class="preview-imagen" style="display: none;">
                         </div>
-                        <div class="imagen-adicional">
-                            <label for="imagen-3">Imagen 3</label>
-                            <input type="file" id="imagen-3" class="imagen-adicional-input" accept="image/*">
-                            <div id="preview-imagen-3" class="imagen-preview"></div>
+                        <div class="imagen-item">
+                            <label>Imagen 2:</label>
+                            <input type="file" accept="image/*" onchange="previewImagen(this, 'preview-2')" data-index="1">
+                            <img id="preview-2" class="preview-imagen" style="display: none;">
                         </div>
-                        <div class="imagen-adicional">
-                            <label for="imagen-4">Imagen 4</label>
-                            <input type="file" id="imagen-4" class="imagen-adicional-input" accept="image/*">
-                            <div id="preview-imagen-4" class="imagen-preview"></div>
+                        <div class="imagen-item">
+                            <label>Imagen 3:</label>
+                            <input type="file" accept="image/*" onchange="previewImagen(this, 'preview-3')" data-index="2">
+                            <img id="preview-3" class="preview-imagen" style="display: none;">
                         </div>
-                        <div class="imagen-adicional">
-                            <label for="imagen-5">Imagen 5</label>
-                            <input type="file" id="imagen-5" class="imagen-adicional-input" accept="image/*">
-                            <div id="preview-imagen-5" class="imagen-preview"></div>
+                        <div class="imagen-item">
+                            <label>Imagen 4:</label>
+                            <input type="file" accept="image/*" onchange="previewImagen(this, 'preview-4')" data-index="3">
+                            <img id="preview-4" class="preview-imagen" style="display: none;">
+                        </div>
+                        <div class="imagen-item">
+                            <label>Imagen 5:</label>
+                            <input type="file" accept="image/*" onchange="previewImagen(this, 'preview-5')" data-index="4">
+                            <img id="preview-5" class="preview-imagen" style="display: none;">
                         </div>
                     </div>
                 </div>
-                <div class="form-actions">
+                <div class="botones">
                     <button type="submit" class="btn-guardar">Guardar Producto</button>
-                    <button type="button" class="btn-secondary" onclick="cerrarModalProducto()">Cancelar</button>
+                    <button type="button" onclick="cerrarModal()" class="btn-cancelar">Cancelar</button>
                 </div>
             </form>
         </div>

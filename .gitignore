@@ -2,22 +2,33 @@
 .DS_Store
 Thumbs.db
 
-# Dependencias
-node_modules/
-
-# Archivos de entorno
-.env
-.env.local
-
 # Archivos de IDE/Editor
 .vscode/
 .idea/
-*.swp
-*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Dependencias
+node_modules/
+vendor/
+
+# Archivos de ambiente
+.env
+.env.local
+.env.*.local
 
 # Archivos de log
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de construcción
+dist/
+build/
+out/
 
 # Archivos temporales
-tmp/
-temp/
+*.tmp
+*.temp
+.cache/

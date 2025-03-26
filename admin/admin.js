@@ -215,7 +215,8 @@ function mostrarHistorialCompras() {
 }
 
 // Variables globales
-let productoEditando = null;
+let productos = [];
+let productoActual = null;
 
 // Función para inicializar la página
 function inicializarPagina() {
@@ -282,244 +283,272 @@ function configurarEventos() {
 
 // Función para cargar productos
 function cargarProductos() {
-    const contenedor = document.getElementById('lista-productos');
-    if (!contenedor) return;
+    const productosContainer = document.querySelector('.productos-grid');
+    if (!productosContainer) return;
 
-    try {
-        // Obtener productos del localStorage
-        let productos = [];
-        const productosGuardados = localStorage.getItem('productos');
-        if (productosGuardados) {
-            productos = JSON.parse(productosGuardados);
-        }
+    productos = JSON.parse(localStorage.getItem('productos') || '[]');
+    productosContainer.innerHTML = '';
 
-        // Mostrar mensaje si no hay productos
-        if (!productos || !productos.length) {
-            contenedor.innerHTML = `
-                <div class="no-productos">
-                    <p>No hay productos registrados</p>
-                    <button class="btn-primary" onclick="mostrarFormularioProducto()">
-                        Agregar Primer Producto
-                    </button>
-                </div>
-            `;
-            return;
-        }
-
-        // Generar HTML para los productos
-        let html = '';
-        productos.forEach(producto => {
-            const imagenUrl = producto.imagenes && producto.imagenes[0] ? 
-                producto.imagenes[0] : '../img/placeholder.jpg';
-            
-            html += `
-                <div class="producto-card">
-                    <div class="producto-imagen">
-                        <img src="${imagenUrl}" 
-                             alt="${producto.nombre || 'Producto'}"
-                             class="producto-img">
-                    </div>
-                    <div class="producto-info">
-                        <h3 class="producto-nombre">${producto.nombre || 'Producto sin nombre'}</h3>
-                        <p class="precio">${formatearPrecio(producto.precio)}</p>
-                        <p class="categoria">${producto.categoria || 'Sin categoría'}</p>
-                        <p class="stock">Stock: ${producto.stock || 0}</p>
-                        <div class="acciones">
-                            <button onclick="mostrarFormularioProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button onclick="eliminarProducto(${producto.id})">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        contenedor.innerHTML = html;
-    } catch (error) {
-        console.error('Error al cargar productos:', error);
-        contenedor.innerHTML = '<p>Error al cargar los productos</p>';
+    if (productos.length === 0) {
+        productosContainer.innerHTML = '<div class="no-productos">No hay productos agregados</div>';
+        return;
     }
+
+    productos.forEach(producto => {
+        const imagenUrl = producto.imagenes && producto.imagenes.length > 0 
+            ? producto.imagenes[0] 
+            : 'img/placeholder.jpg';
+
+        const card = document.createElement('div');
+        card.className = 'producto-card';
+        card.innerHTML = `
+            <div class="producto-imagen">
+                <img src="${imagenUrl}" alt="${producto.nombre}" class="producto-img" loading="lazy">
+            </div>
+            <div class="producto-info">
+                <h3 class="producto-nombre">${producto.nombre}</h3>
+                <p class="precio">$${formatearPrecio(producto.precio)}</p>
+                <p class="categoria">${producto.categoria}</p>
+                <p class="stock">Stock: ${producto.stock}</p>
+                <div class="acciones">
+                    <button onclick="mostrarFormularioProducto(${producto.id})">Editar</button>
+                    <button onclick="eliminarProducto(${producto.id})">Eliminar</button>
+                </div>
+            </div>
+        `;
+
+        productosContainer.appendChild(card);
+    });
 }
 
 // Función para mostrar el formulario de producto
-function mostrarFormularioProducto(producto = null) {
-    productoEditando = producto;
+function mostrarFormularioProducto(id = null) {
     const modal = document.getElementById('modal-producto');
-    const form = document.getElementById('form-producto');
+    const form = document.getElementById('formulario-producto');
     
-    // Limpiar formulario
-    form.reset();
-    document.getElementById('preview-imagen-principal').innerHTML = '';
-    for (let i = 2; i <= 5; i++) {
-        document.getElementById(`preview-imagen-${i}`).innerHTML = '';
-    }
+    productoActual = id ? productos.find(p => p.id === id) : null;
     
-    // Si estamos editando, llenar el formulario
-    if (producto) {
-        form.nombre.value = producto.nombre || '';
-        form.precio.value = producto.precio || '';
-        form.descripcion.value = producto.descripcion || '';
-        form.categoria.value = producto.categoria || '';
-        form.stock.value = producto.stock || '';
+    if (productoActual) {
+        // Modo edición
+        form.nombre.value = productoActual.nombre;
+        form.precio.value = productoActual.precio;
+        form.descripcion.value = productoActual.descripcion;
+        form.categoria.value = productoActual.categoria;
+        form.stock.value = productoActual.stock;
         
         // Mostrar imágenes existentes
-        if (producto.imagenes && producto.imagenes.length > 0) {
-            // Mostrar imagen principal
-            mostrarImagenPreview(producto.imagenes[0], 'preview-imagen-principal');
-            
-            // Mostrar imágenes adicionales
-            for (let i = 1; i < producto.imagenes.length && i < 5; i++) {
-                mostrarImagenPreview(producto.imagenes[i], `preview-imagen-${i+1}`);
+        if (productoActual.imagenes) {
+            productoActual.imagenes.forEach((imagen, index) => {
+                const preview = document.getElementById(`preview-${index + 1}`);
+                if (preview) {
+                    preview.src = imagen;
+                    preview.style.display = 'block';
+                }
+            });
+        }
+    } else {
+        // Modo nuevo producto
+        form.reset();
+        // Limpiar todas las previsualizaciones
+        for (let i = 1; i <= 5; i++) {
+            const preview = document.getElementById(`preview-${i}`);
+            if (preview) {
+                preview.style.display = 'none';
+                preview.src = '';
             }
         }
     }
     
-    // Configurar eventos de preview para cada input de imagen
-    document.getElementById('imagen-principal').addEventListener('change', function(e) {
-        handleImagePreview(e, 'preview-imagen-principal');
-    });
-    
-    for (let i = 2; i <= 5; i++) {
-        document.getElementById(`imagen-${i}`).addEventListener('change', function(e) {
-            handleImagePreview(e, `preview-imagen-${i}`);
-        });
-    }
-    
     modal.style.display = 'block';
-}
-
-// Función para mostrar preview de imagen
-function mostrarImagenPreview(base64Image, containerId) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = `<img src="${base64Image}" alt="Preview">`;
-}
-
-// Función para cerrar el modal
-function cerrarModalProducto() {
-    const modal = document.getElementById('modal-producto');
-    modal.style.display = 'none';
-    productoEditando = null;
-}
-
-// Función para formatear precio
-function formatearPrecio(precio) {
-    return new Intl.NumberFormat('es-AR', {
-        style: 'currency',
-        currency: 'ARS'
-    }).format(precio || 0);
 }
 
 // Función para guardar producto
 async function guardarProducto(event) {
     event.preventDefault();
     
-    try {
-        const form = document.getElementById('form-producto');
-        const imagenPrincipalInput = document.getElementById('imagen-principal');
+    const form = event.target;
+    let imagenes = [];
+    
+    // Procesar todas las imágenes
+    for (let i = 0; i < 5; i++) {
+        const input = form.querySelector(`input[type="file"][data-index="${i}"]`);
+        const preview = document.getElementById(`preview-${i + 1}`);
         
-        // Procesar todas las imágenes
-        let imagenes = [];
-        
-        // Procesar imagen principal
-        if (imagenPrincipalInput.files[0]) {
-            const imagenComprimida = await comprimirImagen(imagenPrincipalInput.files[0]);
-            imagenes.push(imagenComprimida);
-        } else if (productoEditando && productoEditando.imagenes && productoEditando.imagenes[0]) {
-            imagenes.push(productoEditando.imagenes[0]);
+        if (input.files && input.files[0]) {
+            // Si hay una nueva imagen seleccionada
+            const imagenBase64 = await procesarImagen(input.files[0]);
+            imagenes.push(imagenBase64);
+        } else if (productoActual && productoActual.imagenes && productoActual.imagenes[i]) {
+            // Mantener la imagen existente si no se seleccionó una nueva
+            imagenes.push(productoActual.imagenes[i]);
         }
-        
-        // Procesar imágenes adicionales
-        for (let i = 2; i <= 5; i++) {
-            const input = document.getElementById(`imagen-${i}`);
-            if (input.files[0]) {
-                const imagenComprimida = await comprimirImagen(input.files[0]);
-                imagenes.push(imagenComprimida);
-            } else if (productoEditando && productoEditando.imagenes && productoEditando.imagenes[i-1]) {
-                imagenes.push(productoEditando.imagenes[i-1]);
-            }
-        }
-        
-        // Crear objeto producto
-        const producto = {
-            id: productoEditando ? productoEditando.id : Date.now(),
-            nombre: form.nombre.value.trim(),
-            precio: parseFloat(form.precio.value),
-            descripcion: form.descripcion.value.trim(),
-            categoria: form.categoria.value.trim(),
-            stock: parseInt(form.stock.value),
-            imagenes: imagenes
-        };
-        
-        // Obtener productos existentes
-        let productos = [];
-        const productosGuardados = localStorage.getItem('productos');
-        if (productosGuardados) {
-            productos = JSON.parse(productosGuardados);
-        }
-        
-        // Actualizar o agregar producto
-        if (productoEditando) {
-            const index = productos.findIndex(p => p.id === productoEditando.id);
-            if (index !== -1) {
-                productos[index] = producto;
-            }
-        } else {
-            productos.push(producto);
-        }
-        
-        // Guardar en localStorage
-        localStorage.setItem('productos', JSON.stringify(productos));
-        
-        // Cerrar modal y actualizar lista
-        cerrarModalProducto();
-        cargarProductos();
-        
-    } catch (error) {
-        console.error('Error al guardar producto:', error);
-        alert('Error al guardar el producto. Por favor, intente nuevamente.');
     }
+    
+    const producto = {
+        id: productoActual ? productoActual.id : Date.now(),
+        nombre: form.nombre.value,
+        precio: parseFloat(form.precio.value),
+        descripcion: form.descripcion.value,
+        categoria: form.categoria.value,
+        stock: parseInt(form.stock.value),
+        imagenes: imagenes
+    };
+    
+    if (productoActual) {
+        // Actualizar producto existente
+        const index = productos.findIndex(p => p.id === productoActual.id);
+        productos[index] = producto;
+    } else {
+        // Agregar nuevo producto
+        productos.push(producto);
+    }
+    
+    localStorage.setItem('productos', JSON.stringify(productos));
+    cerrarModal();
+    cargarProductos();
 }
 
 // Función para eliminar producto
 function eliminarProducto(id) {
-    if (!confirm('¿Está seguro de que desea eliminar este producto?')) {
-        return;
-    }
-    
-    try {
-        // Obtener productos del localStorage
-        let productos = [];
-        const productosGuardados = localStorage.getItem('productos');
-        if (productosGuardados) {
-            productos = JSON.parse(productosGuardados);
-        }
-        
-        // Filtrar el producto a eliminar
-        productos = productos.filter(producto => producto.id !== id);
-        
-        // Guardar productos actualizados
+    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+        productos = productos.filter(p => p.id !== id);
         localStorage.setItem('productos', JSON.stringify(productos));
-        
-        // Actualizar la lista de productos
         cargarProductos();
-        
-    } catch (error) {
-        console.error('Error al eliminar producto:', error);
-        alert('Error al eliminar el producto. Por favor, intente nuevamente.');
     }
 }
 
-// Inicializar la página cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', inicializarPagina);
+// Función para cerrar el modal
+function cerrarModal() {
+    const modal = document.getElementById('modal-producto');
+    if (modal) {
+        modal.style.display = 'none';
+        productoActual = null;
+        
+        // Limpiar el formulario y las previsualizaciones
+        const form = document.getElementById('formulario-producto');
+        if (form) {
+            form.reset();
+            for (let i = 1; i <= 5; i++) {
+                const preview = document.getElementById(`preview-${i}`);
+                if (preview) {
+                    preview.style.display = 'none';
+                    preview.src = '';
+                }
+            }
+        }
+    }
+}
+
+// Función para formatear precio
+function formatearPrecio(precio) {
+    return new Intl.NumberFormat('es-CL').format(precio || 0);
+}
+
+// Función para procesar imagen
+async function procesarImagen(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Función para previsualizar imagen
+function previewImagen(input, previewId) {
+    const preview = document.getElementById(previewId);
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Función para previsualizar imágenes adicionales
+function previewImagenesAdicionales(input) {
+    const previewContainer = document.getElementById('preview-adicionales');
+    previewContainer.innerHTML = '';
+    
+    if (input.files) {
+        Array.from(input.files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgContainer = document.createElement('div');
+                imgContainer.style.position = 'relative';
+                imgContainer.innerHTML = `
+                    <img src="${e.target.result}" style="width: 100px; height: 100px; object-fit: cover;">
+                    <button type="button" onclick="this.parentElement.remove()" style="position: absolute; top: 0; right: 0;">×</button>
+                `;
+                previewContainer.appendChild(imgContainer);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+}
+
+// Función para cargar la sección de productos
+function cargarSeccionProductos() {
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = `
+        <div class="section-header">
+            <h2>Gestión de Productos</h2>
+            <button class="btn-primary" onclick="mostrarFormularioProducto()">
+                <i class="fas fa-plus"></i> Agregar Nuevo Producto
+            </button>
+        </div>
+        <div class="productos-grid"></div>
+    `;
+    cargarProductos();
+}
+
+// Función para cambiar sección
+function cambiarSeccion(seccion) {
+    // Remover clase activa de todos los enlaces
+    document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+    
+    // Agregar clase activa al enlace seleccionado
+    const enlaceActivo = document.querySelector(`.sidebar nav a[data-section="${seccion}"]`);
+    if (enlaceActivo) enlaceActivo.classList.add('active');
+    
+    // Cargar el contenido de la sección
+    switch(seccion) {
+        case 'productos':
+            cargarSeccionProductos();
+            break;
+        case 'banner':
+            // Implementar carga de sección banner
+            break;
+        case 'hero':
+            // Implementar carga de sección hero
+            break;
+    }
+}
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    // Cargar sección de productos por defecto
+    cargarSeccionProductos();
+    
+    // Configurar navegación del sidebar
+    document.querySelectorAll('.sidebar nav a').forEach(enlace => {
+        enlace.addEventListener('click', (e) => {
+            e.preventDefault();
+            const seccion = e.target.closest('a').dataset.section;
+            cambiarSeccion(seccion);
+        });
+    });
+});
 
 // Hacer las funciones disponibles globalmente
 window.mostrarFormularioProducto = mostrarFormularioProducto;
-window.cerrarModalProducto = cerrarModalProducto;
-window.eliminarProducto = eliminarProducto;
 window.guardarProducto = guardarProducto;
+window.eliminarProducto = eliminarProducto;
+window.cerrarModal = cerrarModal;
+window.previewImagen = previewImagen;
+window.previewImagenesAdicionales = previewImagenesAdicionales;
 
 // Agregar estilos
 const styles = document.createElement('style');
