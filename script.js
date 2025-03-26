@@ -111,7 +111,7 @@ function mostrarDetallesProducto(producto) {
                                             onclick="cambiarImagenPrincipal(this, ${index})"
                                         >
                                     `).join('')}
-                </div>
+                                </div>
                             ` : ''}
                         </div>
                         <div class="producto-info">
@@ -122,12 +122,12 @@ function mostrarDetallesProducto(producto) {
                                 <button class="btn-agregar" onclick="agregarAlCarrito(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
                                     Agregar al Carrito
                                 </button>
-                    </div>
+                            </div>
                         </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
 
         // Agregar el modal al DOM
         document.body.insertAdjacentHTML('beforeend', modalHTML);
@@ -322,3 +322,81 @@ window.cambiarImagenProducto = cambiarImagenProducto;
 window.cargarHero = cargarHero;
 window.cargarAnuncios = cargarAnuncios;
 window.iniciarCarrusel = iniciarCarrusel;
+
+function mostrarDetalleProducto(producto) {
+    const modal = document.getElementById('modal-producto');
+    modal.innerHTML = `
+        <div class="modal-contenido">
+            <span class="cerrar" onclick="cerrarModalProducto()">&times;</span>
+            <div class="producto-detalle">
+                <div class="carrusel-producto">
+                    <div class="carrusel-imagenes">
+                        ${producto.imagenes.map((imagen, index) => `
+                            <div class="carrusel-slide ${index === 0 ? 'activo' : ''}">
+                                <img src="${imagen}" alt="${producto.nombre} - Imagen ${index + 1}">
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${producto.imagenes.length > 1 ? `
+                        <button class="carrusel-control prev" onclick="cambiarSlide(-1)">&#10094;</button>
+                        <button class="carrusel-control next" onclick="cambiarSlide(1)">&#10095;</button>
+                        <div class="carrusel-dots">
+                            ${producto.imagenes.map((_, index) => `
+                                <span class="dot ${index === 0 ? 'activo' : ''}" onclick="irASlide(${index})"></span>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="producto-info">
+                    <h2>${producto.nombre}</h2>
+                    <p class="precio">$${producto.precio.toLocaleString()}</p>
+                    <p class="descripcion">${producto.descripcion}</p>
+                    <div class="cantidad">
+                        <button onclick="cambiarCantidad(-1)">-</button>
+                        <span id="cantidad">1</span>
+                        <button onclick="cambiarCantidad(1)">+</button>
+                    </div>
+                    <button class="btn-agregar" onclick="agregarAlCarrito(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
+                        Agregar al carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    modal.style.display = 'block';
+    slideIndex = 0;
+}
+
+let slideIndex = 0;
+
+function cambiarSlide(n) {
+    mostrarSlide(slideIndex + n);
+}
+
+function irASlide(n) {
+    mostrarSlide(n);
+}
+
+function mostrarSlide(n) {
+    const slides = document.querySelectorAll('.carrusel-slide');
+    const dots = document.querySelectorAll('.dot');
+    
+    if (!slides.length) return;
+    
+    // Ajustar el índice si se pasa de los límites
+    if (n >= slides.length) {
+        slideIndex = 0;
+    } else if (n < 0) {
+        slideIndex = slides.length - 1;
+    } else {
+        slideIndex = n;
+    }
+    
+    // Ocultar todos los slides
+    slides.forEach(slide => slide.classList.remove('activo'));
+    dots.forEach(dot => dot.classList.remove('activo'));
+    
+    // Mostrar el slide actual
+    slides[slideIndex].classList.add('activo');
+    dots[slideIndex].classList.add('activo');
+}

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - LA SUREÑA DECO</title>
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="admin.css">
@@ -14,133 +15,89 @@
             <h1>Panel Admin</h1>
             <nav>
                 <ul>
-                    <li><a href="#" class="active" data-section="productos">
+                    <li><a href="#productos" class="active" data-section="productos">
                         <i class="fas fa-box"></i> Productos
                     </a></li>
-                    <li><a href="#" data-section="banner">
+                    <li><a href="#banner" data-section="banner">
                         <i class="fas fa-image"></i> Banner
                     </a></li>
-                    <li><a href="#" data-section="hero">
+                    <li><a href="#hero" data-section="hero">
                         <i class="fas fa-images"></i> Hero
                     </a></li>
                 </ul>
             </nav>
         </aside>
 
-        <main class="content">
-            <!-- Sección de Productos -->
-            <section id="productos" class="admin-section active">
-                <div class="section-header">
-                    <h2>Gestión de Productos</h2>
-                    <button class="btn-primary" onclick="mostrarFormularioProducto()">
-                        <i class="fas fa-plus"></i> Nuevo Producto
-                    </button>
-                </div>
-                
-                <div class="productos-grid" id="lista-productos">
-                    <!-- Los productos se cargarán aquí dinámicamente -->
-                </div>
-
-                <!-- Modal para Agregar/Editar Producto -->
-                <div id="modal-producto" class="modal">
-                    <div class="modal-content">
-                        <span class="close" onclick="cerrarModalProducto()">&times;</span>
-                        <h3 id="modal-titulo">Nuevo Producto</h3>
-                        <form id="form-producto" onsubmit="guardarProducto(event)">
-                            <input type="hidden" id="producto-id">
-                            <div class="form-group">
-                                <label for="nombre">Nombre:</label>
-                                <input type="text" id="nombre" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="precio">Precio:</label>
-                                <input type="number" id="precio" required min="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="descripcion">Descripción:</label>
-                                <textarea id="descripcion" required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="categoria">Categoría:</label>
-                                <select id="categoria" required>
-                                    <option value="">Seleccione una categoría</option>
-                                    <option value="MESA">MESA</option>
-                                    <option value="DECORACIÓN">DECORACIÓN</option>
-                                    <option value="HOGAR">HOGAR</option>
-                                    <option value="COCINA">COCINA</option>
-                                    <option value="BAÑO">BAÑO</option>
-                                    <option value="AROMAS">AROMAS</option>
-                                    <option value="REGALOS">REGALOS</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="imagen">Imagen:</label>
-                                <input type="file" id="imagen" accept="image/*">
-                                <div id="preview-imagen" class="imagen-preview"></div>
-                            </div>
-                            <div class="form-group">
-                                <label for="stock">Stock:</label>
-                                <input type="number" id="stock" required min="0">
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn-primary">Guardar</button>
-                                <button type="button" class="btn-secondary" onclick="cerrarModalProducto()">Cancelar</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Sección de Banner -->
-            <section id="banner" class="admin-section">
-                <div class="section-header">
-                    <h2>Gestión de Banner</h2>
-                </div>
-                <div class="banner-container">
-                    <div class="preview-container">
-                        <img id="banner-preview" src="../img/banner.jpg" alt="Banner actual" 
-                             onerror="this.src='../img/placeholder.jpg'">
-                    </div>
-                    <div class="form-group">
-                        <label for="bannerFile">Seleccionar nueva imagen:</label>
-                        <input type="file" id="bannerFile" accept="image/*">
-                    </div>
-                    <button onclick="guardarBanner()" class="btn-primary">
-                        Guardar Banner
-                    </button>
-                </div>
-            </section>
-
-            <!-- Sección de Hero -->
-            <section id="hero" class="admin-section">
-                <div class="section-header">
-                    <h2>Gestión de Hero</h2>
-                </div>
-                <div class="hero-container">
-                    <div class="preview-container">
-                        <img id="hero-preview" src="../img/hero.jpg" alt="Hero actual"
-                             onerror="this.src='../img/placeholder.jpg'">
-                    </div>
-                    <div class="form-group">
-                        <label for="heroTitulo">Título:</label>
-                        <input type="text" id="heroTitulo" value="LA SUREÑA DECO">
-                    </div>
-                    <div class="form-group">
-                        <label for="heroSubtitulo">Subtítulo:</label>
-                        <input type="text" id="heroSubtitulo" value="Decoración para tu hogar">
-                    </div>
-                    <div class="form-group">
-                        <label for="heroFile">Seleccionar nueva imagen:</label>
-                        <input type="file" id="heroFile" accept="image/*">
-                    </div>
-                    <button onclick="guardarHero()" class="btn-primary">
-                        Guardar Hero
-                    </button>
-                </div>
-            </section>
+        <main id="main-content" class="content">
+            <!-- El contenido se cargará dinámicamente aquí -->
         </main>
     </div>
 
+    <!-- Modal para Agregar/Editar Producto -->
+    <div class="modal-producto" id="modal-producto">
+        <div class="modal-contenido">
+            <span class="cerrar" onclick="cerrarModalProducto()">&times;</span>
+            <h2>Producto</h2>
+            <form id="form-producto">
+                <div class="form-group">
+                    <label for="nombre">Nombre del producto</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="precio">Precio</label>
+                    <input type="number" id="precio" name="precio" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="categoria">Categoría</label>
+                    <input type="text" id="categoria" name="categoria" required>
+                </div>
+                <div class="form-group">
+                    <label for="stock">Stock</label>
+                    <input type="number" id="stock" name="stock" required>
+                </div>
+                <div class="imagenes-container">
+                    <div class="imagen-principal">
+                        <label for="imagen-principal">Imagen Principal</label>
+                        <input type="file" id="imagen-principal" accept="image/*">
+                        <div id="preview-imagen-principal" class="imagen-preview"></div>
+                    </div>
+                    <div class="imagenes-adicionales">
+                        <h3>Imágenes Adicionales</h3>
+                        <div class="imagen-adicional">
+                            <label for="imagen-2">Imagen 2</label>
+                            <input type="file" id="imagen-2" class="imagen-adicional-input" accept="image/*">
+                            <div id="preview-imagen-2" class="imagen-preview"></div>
+                        </div>
+                        <div class="imagen-adicional">
+                            <label for="imagen-3">Imagen 3</label>
+                            <input type="file" id="imagen-3" class="imagen-adicional-input" accept="image/*">
+                            <div id="preview-imagen-3" class="imagen-preview"></div>
+                        </div>
+                        <div class="imagen-adicional">
+                            <label for="imagen-4">Imagen 4</label>
+                            <input type="file" id="imagen-4" class="imagen-adicional-input" accept="image/*">
+                            <div id="preview-imagen-4" class="imagen-preview"></div>
+                        </div>
+                        <div class="imagen-adicional">
+                            <label for="imagen-5">Imagen 5</label>
+                            <input type="file" id="imagen-5" class="imagen-adicional-input" accept="image/*">
+                            <div id="preview-imagen-5" class="imagen-preview"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-guardar">Guardar Producto</button>
+                    <button type="button" class="btn-secondary" onclick="cerrarModalProducto()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="utils.js"></script>
     <script src="admin.js"></script>
 </body>
 </html> 

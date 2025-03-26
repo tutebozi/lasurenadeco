@@ -1,53 +1,68 @@
 # LA SUREÑA DECO - Tienda Online
 
-Sitio web de e-commerce para La Sureña Deco, especializada en decoración para el hogar.
+Tienda online de decoración para el hogar con panel de administración integrado.
 
 ## Características
 
-- Catálogo de productos con categorías
+- Catálogo de productos con imágenes múltiples
 - Carrito de compras
 - Panel de administración
 - Gestión de productos
-- Banner y Hero dinámicos
-- Sistema de usuarios
+- Gestión de banner y hero section
+- Diseño responsive
 
-## Tecnologías utilizadas
+## Estructura del Proyecto
+
+```
+/
+├── admin/           # Panel de administración
+│   ├── admin.js
+│   ├── admin.css
+│   └── index.html
+├── img/            # Imágenes del sitio
+├── styles.css      # Estilos principales
+├── productos.js    # Lógica de productos
+└── index.html      # Página principal
+```
+
+## Tecnologías Utilizadas
 
 - HTML5
 - CSS3
 - JavaScript (Vanilla)
 - LocalStorage para persistencia de datos
 
-## Estructura del proyecto
-
-```
-/
-├── admin/              # Panel de administración
-│   ├── index.html
-│   ├── admin.js
-│   └── admin.css
-├── img/               # Imágenes del sitio
-├── index.html         # Página principal
-├── styles.css         # Estilos principales
-├── hero.css          # Estilos del hero
-├── carrito.js        # Funcionalidad del carrito
-├── login.js          # Sistema de usuarios
-└── productos.js      # Gestión de productos
-```
-
 ## Instalación
 
-1. Clona el repositorio
-2. No requiere instalación de dependencias
-3. Abre `index.html` en tu navegador o usa un servidor local
+1. Clona el repositorio:
+```bash
+git clone https://github.com/tuusuario/lasureniadeco.git
+```
+
+2. Abre el proyecto con un servidor local (por ejemplo, usando Live Server en VS Code)
 
 ## Uso
 
-Para desarrollo local, se recomienda usar un servidor local como Live Server de VS Code.
+### Tienda Principal
+- Accede a la tienda desde `index.html`
+- Navega por los productos
+- Agrega productos al carrito
+- Realiza compras
 
-## Panel de Administración
+### Panel de Administración
+- Accede al panel desde `admin/index.html`
+- Gestiona productos (agregar, editar, eliminar)
+- Administra imágenes de productos
+- Configura banner y hero section
 
-Accede al panel de administración en `/admin` para:
-- Gestionar productos
-- Editar banner y hero
-- Ver estadísticas 
+## Contribuir
+
+1. Haz fork del proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles. 

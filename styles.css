@@ -402,129 +402,160 @@ footer {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.8);
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    padding: 20px;
+    overflow-y: auto;
 }
 
-.producto-detalle {
-    background: white;
+.modal-contenido {
+    background-color: white;
     padding: 2rem;
     border-radius: 8px;
-    max-width: 1000px;
     width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-width: 1200px;
+    margin: 20px auto;
     position: relative;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-}
-
-.btn-cerrar {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-    color: var(--accent-color);
-}
-
-.producto-imagenes {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    width: 100%;
 }
 
-.imagen-principal-container {
+.producto-imagenes-carousel {
     width: 100%;
-    height: 400px;
+    margin-bottom: 2rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    background: #f8f8f8;
-    border-radius: 8px;
-    overflow: hidden;
 }
 
 .imagen-principal {
     width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: transform 0.3s ease;
+    padding-bottom: 56.25%; /* Aspecto 16:9 */
+    position: relative;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
 }
 
-.miniaturas {
+.imagen-principal img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.imagenes-miniaturas {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 1rem;
+    padding: 0.5rem;
     justify-content: center;
     flex-wrap: wrap;
+    max-width: 100%;
 }
 
-.miniatura {
-    width: 60px;
-    height: 60px;
+.imagenes-miniaturas img {
+    width: 80px;
+    height: 80px;
     object-fit: cover;
     border-radius: 4px;
     cursor: pointer;
-    transition: transform 0.2s;
     border: 2px solid transparent;
+    transition: all 0.3s ease;
 }
 
-.miniatura:hover {
+.imagenes-miniaturas img:hover {
     transform: scale(1.1);
-    border-color: #8B7355;
+    border-color: var(--accent-color);
 }
 
-.miniatura.activa {
+.imagenes-miniaturas img.activa {
     border-color: var(--accent-color);
 }
 
 .producto-info {
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    padding: 1rem 0;
 }
 
-.producto-titulo {
-    font-size: 2rem;
-    color: var(--text-color);
+.producto-info h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.producto-info .precio {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent-color);
     margin-bottom: 1rem;
 }
 
-.producto-precio {
-    font-size: 1.8rem;
-    color: var(--accent-color);
-    font-weight: bold;
+.producto-info .descripcion {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1rem;
 }
 
-.producto-descripcion {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: var(--text-color);
-    margin: 1rem 0;
+.producto-info .categoria,
+.producto-info .stock {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.cerrar {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #333;
+    z-index: 10;
+    background: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 @media (max-width: 768px) {
-    .producto-detalle {
-        grid-template-columns: 1fr;
+    .modal-contenido {
         padding: 1rem;
+        margin: 10px;
     }
-    
-    .imagen-principal-container {
-        height: 300px;
+
+    .imagen-principal {
+        padding-bottom: 100%; /* Aspecto 1:1 en móviles */
     }
-    
-    .miniatura {
+
+    .imagenes-miniaturas img {
         width: 60px;
         height: 60px;
     }
+
+    .producto-info h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); }
+    to { transform: translateY(0); }
 }
 
 /* Estilos para el ícono del carrito */
@@ -1645,4 +1676,101 @@ footer {
 
 .miniatura:hover {
     transform: scale(1.1);
+}
+
+.carrusel-producto {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.carrusel-imagenes {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.carrusel-slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.carrusel-slide.activo {
+    opacity: 1;
+}
+
+.carrusel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.carrusel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 18px;
+    transition: background-color 0.3s;
+}
+
+.carrusel-control:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.carrusel-control.prev {
+    left: 10px;
+}
+
+.carrusel-control.next {
+    right: 10px;
+}
+
+.carrusel-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.dot.activo {
+    background: white;
+}
+
+.producto-detalle {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+@media (max-width: 768px) {
+    .producto-detalle {
+        flex-direction: column;
+    }
+    
+    .carrusel-imagenes {
+        height: 300px;
+    }
 } 

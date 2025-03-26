@@ -3,144 +3,151 @@ let productos = [];
 const categorias = ['MESA', 'DECORACIÓN', 'HOGAR', 'COCINA', 'BAÑO', 'AROMAS', 'REGALOS'];
 
 // Función para cargar productos
-async function cargarProductos(categoria = null) {
-    try {
-        // Obtener productos del localStorage o usar array vacío
-        productos = JSON.parse(localStorage.getItem('productos')) || [];
-        
-        // Filtrar por categoría si se especifica
-        const productosFiltrados = categoria ? 
-            productos.filter(p => p.categoria === categoria) : 
-            productos;
+function cargarProductos() {
+    const productosContainer = document.querySelector('.productos-container');
+    if (!productosContainer) return;
 
-        const contenedor = document.querySelector('.productos-container');
-        if (!contenedor) return;
-
-        if (productosFiltrados.length === 0) {
-            contenedor.innerHTML = '<p class="no-productos">No hay productos disponibles</p>';
-            return;
-        }
-
-        // Crear una imagen temporal para verificar si placeholder.jpg existe
-        const img = new Image();
-        img.src = 'img/placeholder.jpg';
-        const placeholderDefault = 'data:image/svg+xml;base64,' + btoa(`
-            <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-                <rect width="100%" height="100%" fill="#f8f9fa"/>
-                <text x="50%" y="50%" font-family="Arial" font-size="14" fill="#495057" text-anchor="middle">
-                    Imagen no disponible
-                </text>
-            </svg>
-        `);
-
-        contenedor.innerHTML = productosFiltrados.map(producto => `
-            <div class="producto-card" onclick="mostrarDetallesProducto(${producto.id})">
-                <img src="${producto.imagen || 'img/placeholder.jpg'}" 
-                     alt="${producto.nombre}"
-                     onerror="this.onerror=null; this.src='${placeholderDefault}'">
-                <div class="producto-info">
-                    <h3>${producto.nombre}</h3>
-                    <p class="precio">$${formatearPrecio(producto.precio)}</p>
-                    <p class="descripcion">${producto.descripcion}</p>
-                </div>
-            </div>
-        `).join('');
-
-    } catch (error) {
-        console.error('Error al cargar productos:', error);
+    // Obtener productos del localStorage
+    let productos = [];
+    const productosGuardados = localStorage.getItem('productos');
+    if (productosGuardados) {
+        productos = JSON.parse(productosGuardados);
     }
+
+    // Limpiar el contenedor
+    productosContainer.innerHTML = '';
+
+    // Mostrar productos
+    productos.forEach(producto => {
+        const imagenUrl = producto.imagenes && producto.imagenes.length > 0 
+            ? producto.imagenes[0] 
+            : 'img/placeholder.jpg';
+
+        const productoElement = document.createElement('div');
+        productoElement.className = 'producto-card';
+        productoElement.innerHTML = `
+            <div class="producto-imagen" onclick="mostrarDetalleProducto('${producto.id}')">
+                <img src="${imagenUrl}" alt="${producto.nombre}" loading="lazy">
+            </div>
+            <h3 class="producto-titulo">${producto.nombre}</h3>
+            <p class="producto-precio">$${formatearPrecio(producto.precio)}</p>
+            <p class="producto-categoria">${producto.categoria}</p>
+            <button class="btn-agregar" onclick="agregarAlCarrito('${producto.id}')">
+                Agregar al carrito
+            </button>
+        `;
+
+        productosContainer.appendChild(productoElement);
+    });
 }
 
-// Función para mostrar detalles del producto
-function mostrarDetallesProducto(id) {
-    const producto = productos.find(p => p.id === id);
-    if (!producto) return;
+// Función para mostrar detalle del producto
+function mostrarDetalleProducto(id) {
+    const productos = JSON.parse(localStorage.getItem('productos') || '[]');
+    const producto = productos.find(p => p.id === parseInt(id) || p.id === id);
+    if (!producto) {
+        console.error('Producto no encontrado:', id);
+        return;
+    }
 
-    // Crear modal si no existe
-    let modal = document.getElementById('modal-producto-detalle');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'modal-producto-detalle';
-        modal.className = 'modal-producto';
-        document.body.appendChild(modal);
+    // Crear el modal si no existe
+    let modal = document.querySelector('.modal-producto');
+    if (modal) {
+        modal.remove();
+    }
+    
+    modal = document.createElement('div');
+    modal.className = 'modal-producto';
+    
+    let imagenesHTML = '';
+    if (producto.imagenes && producto.imagenes.length > 0) {
+        imagenesHTML = `
+            <div class="producto-imagenes-carousel">
+                <div class="imagen-principal">
+                    <img src="${producto.imagenes[0]}" alt="${producto.nombre}">
+                </div>
+                ${producto.imagenes.length > 1 ? `
+                    <div class="imagenes-miniaturas">
+                        ${producto.imagenes.map((img, index) => `
+                            <img src="${img}" 
+                                alt="${producto.nombre} - Imagen ${index + 1}"
+                                onclick="cambiarImagenPrincipal(this.src)"
+                                class="${index === 0 ? 'activa' : ''}">
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
     }
 
     modal.innerHTML = `
         <div class="modal-contenido">
-            <span class="cerrar" onclick="cerrarModalDetalle()">&times;</span>
-            <div class="producto-detalle">
-                <div class="producto-imagen">
-                    <img src="${producto.imagen || 'img/placeholder.jpg'}" 
-                         alt="${producto.nombre}"
-                         onerror="this.src='img/placeholder.jpg'">
-                </div>
-                <div class="producto-info-detalle">
-                    <h2>${producto.nombre}</h2>
-                    <p class="precio">$${formatearPrecio(producto.precio)}</p>
-                    <p class="descripcion">${producto.descripcion}</p>
-                    <p class="categoria">Categoría: ${producto.categoria}</p>
-                    <p class="stock">Stock disponible: ${producto.stock} unidades</p>
-                    <div class="cantidad-container">
-                        <label>Cantidad:</label>
-                        <div class="cantidad-controls">
-                            <button onclick="cambiarCantidad(-1)">-</button>
-                            <input type="number" id="cantidad" value="1" min="1" max="${producto.stock}">
-                            <button onclick="cambiarCantidad(1)">+</button>
-                        </div>
-                    </div>
-                    <button class="btn-agregar" onclick="agregarAlCarritoDesdeModal(${producto.id})">
-                        Agregar al carrito
-                    </button>
-                </div>
+            <span class="cerrar" onclick="cerrarModalProducto()">&times;</span>
+            ${imagenesHTML}
+            <div class="producto-info">
+                <h2>${producto.nombre}</h2>
+                <p class="precio">$${formatearPrecio(producto.precio)}</p>
+                <p class="descripcion">${producto.descripcion}</p>
+                <p class="categoria">Categoría: ${producto.categoria}</p>
+                <p class="stock">Stock disponible: ${producto.stock}</p>
+                <button class="btn-agregar" onclick="agregarAlCarrito('${producto.id}')">
+                    Agregar al carrito
+                </button>
             </div>
         </div>
     `;
 
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-// Función para cerrar el modal de detalles
-function cerrarModalDetalle() {
-    const modal = document.getElementById('modal-producto-detalle');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
-// Función para cambiar la cantidad en el modal
-function cambiarCantidad(cambio) {
-    const input = document.getElementById('cantidad');
-    const nuevoValor = parseInt(input.value) + cambio;
-    if (nuevoValor >= 1 && nuevoValor <= parseInt(input.max)) {
-        input.value = nuevoValor;
-    }
-}
-
-// Función para agregar al carrito desde el modal
-function agregarAlCarritoDesdeModal(id) {
-    const producto = productos.find(p => p.id === id);
-    const cantidad = parseInt(document.getElementById('cantidad').value);
+    document.body.appendChild(modal);
     
-    if (producto && cantidad > 0) {
-        const productoParaCarrito = {
-            ...producto,
-            cantidad: cantidad
-        };
-        agregarAlCarrito(productoParaCarrito);
-        cerrarModalDetalle();
+    // Mostrar el modal con una pequeña animación
+    requestAnimationFrame(() => {
+        modal.style.display = 'block';
+        modal.style.opacity = '0';
+        requestAnimationFrame(() => {
+            modal.style.opacity = '1';
+        });
+    });
+
+    // Agregar evento para cerrar el modal al hacer clic fuera
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            cerrarModalProducto();
+        }
+    });
+}
+
+// Función para cambiar la imagen principal en el detalle del producto
+function cambiarImagenPrincipal(src) {
+    const imagenPrincipal = document.querySelector('.imagen-principal img');
+    if (imagenPrincipal) {
+        imagenPrincipal.src = src;
+    }
+    
+    // Actualizar clase activa en miniaturas
+    document.querySelectorAll('.imagenes-miniaturas img').forEach(img => {
+        img.classList.toggle('activa', img.src === src);
+    });
+}
+
+// Función para cerrar el modal de producto
+function cerrarModalProducto() {
+    const modal = document.querySelector('.modal-producto');
+    if (modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.remove();
+        }, 200);
     }
 }
 
 // Función para formatear precio
 function formatearPrecio(precio) {
-    return precio.toLocaleString('es-CL');
+    return new Intl.NumberFormat('es-CL').format(precio || 0);
 }
 
 // Función para filtrar productos por categoría
 function filtrarPorCategoria(categoria) {
-    cargarProductos(categoria);
+    cargarProductos();
 }
 
 // Inicializar cuando el DOM esté listo
@@ -158,9 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Cerrar modal al hacer clic fuera
     window.addEventListener('click', (e) => {
-        const modal = document.getElementById('modal-producto-detalle');
+        const modal = document.querySelector('.modal-producto');
         if (e.target === modal) {
-            cerrarModalDetalle();
+            cerrarModalProducto();
         }
     });
 });
@@ -169,7 +176,5 @@ document.addEventListener('DOMContentLoaded', () => {
 window.cargarProductos = cargarProductos;
 window.filtrarPorCategoria = filtrarPorCategoria;
 window.formatearPrecio = formatearPrecio;
-window.mostrarDetallesProducto = mostrarDetallesProducto;
-window.cerrarModalDetalle = cerrarModalDetalle;
-window.cambiarCantidad = cambiarCantidad;
-window.agregarAlCarritoDesdeModal = agregarAlCarritoDesdeModal; 
+window.cerrarModalProducto = cerrarModalProducto;
+window.cambiarImagenPrincipal = cambiarImagenPrincipal; 
