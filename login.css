@@ -1,0 +1,236 @@
+/* Estilos para el modal de login */
+.modal-login {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-contenido-login {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn-cerrar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s;
+}
+
+.btn-cerrar:hover {
+    color: #333;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: #f0f0f0;
+    color: #666;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    background: #8B7355;
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.modal-contenido-login form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-contenido-login input {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.modal-contenido-login input:focus {
+    border-color: #8B7355;
+    outline: none;
+}
+
+.modal-contenido-login button[type="submit"] {
+    padding: 12px;
+    background: #8B7355;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.modal-contenido-login button[type="submit"]:hover {
+    background: #6B5B45;
+}
+
+/* Estilos para el menú de usuario */
+.user-menu-container {
+    position: relative;
+    cursor: pointer;
+}
+
+.user-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px 0;
+    min-width: 200px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+.user-menu-container:hover .user-menu {
+    display: block;
+}
+
+.user-menu::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-left: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    transform: rotate(45deg);
+}
+
+.user-name {
+    display: block;
+    padding: 8px 20px;
+    color: #333;
+    font-weight: 500;
+    border-bottom: 1px solid #eee;
+}
+
+.user-menu a {
+    display: block;
+    padding: 8px 20px;
+    color: #666;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.user-menu a:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.user-menu a:last-child {
+    color: #dc3545;
+}
+
+.user-menu a:last-child:hover {
+    background: #fff5f5;
+}
+
+/* Estilos para dispositivos móviles */
+@media (max-width: 768px) {
+    .modal-contenido-login {
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .tabs {
+        flex-direction: column;
+    }
+    
+    .user-menu {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        margin: 0;
+        border-radius: 12px 12px 0 0;
+        padding: 20px 0;
+        animation: slideUp 0.3s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+    
+    .user-menu::before {
+        display: none;
+    }
+    
+    .user-name {
+        text-align: center;
+        font-size: 18px;
+        padding: 15px 20px;
+    }
+    
+    .user-menu a {
+        text-align: center;
+        padding: 15px 20px;
+        font-size: 16px;
+    }
+} 

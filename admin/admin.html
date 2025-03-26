@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - LA SUREÑA DECO</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="sidebar">
+            <h1>Panel Admin - LA SUREÑA DECO</h1>
+            <nav>
+                <button onclick="window.admin.editarHero()" class="btn-accion">Editar Hero</button>
+                <button onclick="window.admin.editarAnuncios()" class="btn-accion">Editar Anuncios</button>
+                <button onclick="window.admin.gestionarCategorias()" class="btn-accion">Gestionar Categorías</button>
+                <button onclick="window.admin.gestionarProductos()" class="btn-accion">Gestionar Productos</button>
+                <button onclick="window.admin.gestionarUsuarios()" class="btn-accion">Gestionar Usuarios</button>
+                <button onclick="window.admin.historialCompras()" class="btn-accion">Historial de Compras</button>
+                <button onclick="window.admin.volverTienda()" class="btn-accion">Volver a la tienda</button>
+            </nav>
+        </div>
+        <main id="main-content">
+            <!-- El contenido se cargará dinámicamente aquí -->
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

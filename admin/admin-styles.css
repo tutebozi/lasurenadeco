@@ -1,0 +1,411 @@
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --accent-color: #3498db;
+    --background-color: #f5f7fa;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #4A4A4A;
+    padding: 20px;
+    color: white;
+    height: 100vh;
+}
+
+.sidebar h1 {
+    font-size: 18px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.sidebar .btn-accion {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    background-color: #8B7355;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: left;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.sidebar .btn-accion:hover {
+    background-color: #D2C2B0;
+}
+
+#main-content {
+    flex: 1;
+    padding: 20px;
+    margin-left: 250px;
+}
+
+.content {
+    flex: 1;
+    padding: 2rem;
+}
+
+.content header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-info a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+/* Estilos para la tabla de productos */
+.tabla-admin {
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.tabla-admin th,
+.tabla-admin td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.tabla-admin th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-accion {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-editar {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-eliminar {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-agregar {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.botones-accion {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.btn-inicializar {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-inicializar:hover {
+    background-color: #2980b9;
+}
+
+/* Estilos del formulario de login */
+.login-form {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos para mensajes de error */
+.error-message {
+    color: #dc3545;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+/* Estilos para el dashboard */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.dashboard-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Estilos para la galería de imágenes */
+.galeria-imagenes {
+    display: grid;
+    gap: 1rem;
+}
+
+.imagen-principal,
+.imagen-adicional {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    position: relative;
+}
+
+.imagen-principal img,
+.imagen-adicional img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.input-imagen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f1f3f5;
+    border-radius: 8px;
+    border: 2px solid #dee2e6;
+}
+
+.botones-imagen {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    width: 100%;
+}
+
+.btn-file {
+    background-color: #3498db;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-align: center;
+    border: 2px solid #2980b9;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    margin: 8px;
+    width: auto;
+    min-width: 150px;
+}
+
+.btn-file:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+/* Estilos para las imágenes adicionales */
+.imagenes-adicionales {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.modal-galeria {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-contenido {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%;
+    width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.grid-galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    padding: 16px;
+}
+
+.imagen-galeria {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.imagen-galeria:hover {
+    transform: scale(1.05);
+}
+
+.imagen-galeria img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.btn-cerrar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-cerrar:hover {
+    background: #c0392b;
+}
+
+/* Estilos para el formulario de edición de productos */
+.formulario-edicion {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.formulario-producto {
+    display: grid;
+    gap: 1.5rem;
+}
+
+/* Estilos para la sección de texto en movimiento */
+.lista-textos {
+    margin-top: 2rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.campo-texto {
+    margin-bottom: 1.5rem;
+}
+
+.campo-texto input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.tabla-textos {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.tabla-textos th,
+.tabla-textos td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.tabla-textos th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.tabla-textos .btn-accion {
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+}
+
+.btn-agregar-texto {
+    background-color: #2ecc71;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+/* Estilos para los botones del sidebar */
+.sidebar .btn-accion:hover {
+    background-color: rgba(255,255,255,0.2);
+} 

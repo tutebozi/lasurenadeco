@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LA SUREÑA DECO</title>
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="hero.css">
+    <link rel="stylesheet" href="carrito.css">
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="productos.css">
+</head>
+<body>
+    <!-- Header con logo centrado -->
+    <header>
+        <a href="#" class="logo">LA SUREÑA DECO</a>
+        <nav>
+            <ul>
+                <li><a href="#">MESA</a></li>
+                <li><a href="#">DECORACIÓN</a></li>
+                <li><a href="#">HOGAR</a></li>
+                <li><a href="#">COCINA</a></li>
+                <li><a href="#">BAÑO</a></li>
+                <li><a href="#">AROMAS</a></li>
+                <li><a href="#">REGALOS</a></li>
+            </ul>
+        </nav>
+        <div class="user-cart-container">
+            <a href="#" class="user-icon" onclick="mostrarModalLogin(); return false;">
+                <i class="fas fa-user"></i>
+            </a>
+            <a href="#" onclick="abrirCarrito(); return false;" class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="contador-carrito" class="cart-count">0</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Banner justo después del header -->
+    <div class="banner-anuncios">
+        <div class="banner-texto-container">
+            <!-- Los anuncios se cargarán dinámicamente con JavaScript -->
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-carousel">
+            <div class="hero-slides">
+                <!-- Las imágenes se cargarán aquí -->
+            </div>
+            <div class="hero-content">
+                <h1>LA SUREÑA DECO</h1>
+                <p>Decoración para tu hogar</p>
+            </div>
+            <div class="hero-controls">
+                <button class="prev-slide">&lt;</button>
+                <div class="hero-dots"></div>
+                <button class="next-slide">&gt;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <div class="productos-container">
+            <!-- Los productos se cargarán aquí dinámicamente -->
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script src="carrito.js"></script>
+    <script src="login.js"></script>
+    <script src="productos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarHero();
+            cargarAnuncios();
+            cargarProductos();
+        });
+    </script>
+</body>
+</html> 

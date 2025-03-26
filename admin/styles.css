@@ -1,0 +1,175 @@
+:root {
+    --background-color: #f8f4e4;
+    --primary-color: #2c3e50;
+    --accent-color: #3498db;
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --text-color: #2C2C2C;
+    --shadow: 0 2px 15px rgba(0,0,0,0.1);
+}
+
+body {
+    background-color: var(--background-color);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 2rem;
+}
+
+.formulario-producto {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    max-width: 800px;
+    margin: 2rem auto;
+}
+
+.form-edit {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.form-edit input,
+.form-edit textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-edit label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-edit select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.form-edit select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.form-select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.tabla-admin {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border-collapse: collapse;
+}
+
+.tabla-admin th {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+}
+
+.tabla-admin td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.btn-accion {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-agregar {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-editar {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-eliminar {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-accion:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.select-seccion {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+    margin-top: 5px;
+}
+
+.select-seccion:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.categoria-selector {
+    margin-bottom: 15px;
+}
+
+.botones-categoria {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.btn-categoria {
+    padding: 10px 20px;
+    border: 1px solid var(--accent-color);
+    background-color: white;
+    color: var(--accent-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.btn-categoria:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-categoria.activo {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.categoria-selector {
+    margin: 20px 0;
+} 
