@@ -1,7 +1,7 @@
-.hero-section {
-    width: 100%;
-    height: 500px;
+/* Reset completo de estilos hero */
+.hero {
     position: relative;
+    height: 400px;
     overflow: hidden;
     margin-bottom: 40px;
 }
@@ -10,6 +10,7 @@
     width: 100%;
     height: 100%;
     position: relative;
+    overflow: hidden;
 }
 
 .hero-slides {
@@ -18,25 +19,50 @@
     position: relative;
 }
 
+/* Estilo básico para todos los slides */
 .hero-slide {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    background: #8B7355;
+    transition: transform 0.8s ease;
+    opacity: 1; /* Todos los slides son completamente opacos */
 }
 
+/* Posiciones por defecto */
+.hero-slide {
+    transform: translateX(100%); /* Por defecto, fuera a la derecha */
+    z-index: 1;
+}
+
+/* El slide activo (visible) */
 .hero-slide.active {
-    opacity: 1;
+    transform: translateX(0); /* Centrado */
+    z-index: 3;
 }
 
+/* El slide anterior que sale */
+.hero-slide.anterior {
+    transform: translateX(-100%); /* Sale por la izquierda */
+    z-index: 2;
+}
+
+/* Asegurar que las imágenes cubran todo el slide */
 .hero-slide img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
+    display: block;
 }
 
+/* Eliminamos completamente los dots */
+.hero-dots {
+    display: none !important;
+}
+
+/* Estilos para el contenido del hero */
 .hero-content {
     position: absolute;
     top: 50%;
@@ -61,41 +87,17 @@
     font-family: 'Poppins', sans-serif;
 }
 
-.hero-controls {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    z-index: 3;
-}
-
-.prev-slide,
-.next-slide {
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 18px;
-}
-
-.hero-dots {
-    display: flex;
-    gap: 8px;
-}
-
-.hero-dot {
-    width: 10px;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.hero-dot.active {
-    background: white;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-nav-arrow {
+        font-size: 25px;
+    }
+    
+    .hero-nav-prev {
+        left: 10px;
+    }
+    
+    .hero-nav-next {
+        right: 10px;
+    }
 } 

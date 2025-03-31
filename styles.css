@@ -440,20 +440,22 @@ footer {
     display: none;
     z-index: 1000;
     overflow-y: auto;
-    padding: 20px;
+    padding-top: 100px; /* Espacio para el header */
 }
 
 .modal-contenido {
     background-color: white;
-    padding: 2rem;
+    padding: 2.5rem;
     border-radius: 8px;
     width: 95%;
-    max-width: 1200px;
-    margin: 20px auto;
+    max-width: 1400px;
+    max-height: 90vh;
+    margin: auto;
     position: relative;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    gap: 2.5rem;
+    overflow-y: auto;
 }
 
 .producto-imagenes-carousel {
@@ -466,7 +468,7 @@ footer {
 
 .imagen-principal-container {
     width: 100%;
-    height: 500px;
+    height: 450px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -532,29 +534,28 @@ footer {
 }
 
 .producto-info {
-    padding: 1rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .producto-info h2 {
-    font-size: 2rem;
+    font-size: 2.4rem;
     color: var(--primary-color);
     margin-bottom: 1rem;
 }
 
 .producto-info .precio {
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     font-weight: bold;
     color: var(--accent-color);
 }
 
 .producto-info .descripcion {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     line-height: 1.6;
     color: #666;
-    margin: 1rem 0;
 }
 
 .producto-info .categoria,
@@ -580,31 +581,25 @@ footer {
 }
 
 @media (max-width: 768px) {
+    .modal-producto {
+        padding-top: 80px; /* Menos espacio en móviles */
+    }
+    
     .modal-contenido {
-        grid-template-columns: 1fr;
-        padding: 1rem;
+        padding: 2rem;
+        max-height: 90vh;
     }
 
     .imagen-principal-container {
-        height: 300px;
-    }
-
-    .imagenes-miniaturas {
-        gap: 0.5rem;
-        padding: 0.25rem;
-    }
-
-    .imagenes-miniaturas img {
-        width: 60px;
-        height: 60px;
+        height: 350px;
     }
 
     .producto-info h2 {
-        font-size: 1.5rem;
+        font-size: 2rem;
     }
 
     .producto-info .precio {
-        font-size: 1.3rem;
+        font-size: 1.8rem;
     }
 }
 
@@ -908,18 +903,22 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    transform: translateX(100%);
+    transition: transform 0.8s ease;
+    opacity: 1;
+    z-index: 1;
 }
 
 .hero-slide.active {
-    opacity: 1;
+    transform: translateX(0);
+    z-index: 2;
 }
 
 .hero-slide img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
 }
 
 .hero-content {
@@ -1634,62 +1633,68 @@ footer {
 }
 
 .banner-anuncios {
-    background-color: var(--light-accent);
-    color: var(--primary-color);
-    width: 100%;
+    background-color: #D2C1B0;
+    padding: 8px 0;
     overflow: hidden;
-    position: relative;
-    height: 40px;
-    margin: 20px 0; /* Espacio arriba y abajo del banner */
-}
-
-.banner-contenido {
-    display: flex;
     width: 100%;
-    height: 100%;
-    align-items: center;
+    position: relative;
 }
 
 .banner-texto-container {
-    display: flex;
-    gap: 50px;
-    animation: scroll 20s linear infinite;
-    white-space: nowrap;
-    padding: 0 50px;
-}
-
-.texto-anuncio {
-    font-size: 14px;
-    font-weight: 500;
-    padding: 0 20px;
-}
-
-@keyframes scroll {
-    0% {
-        transform: translateX(100%);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
-}
-
-.hero-section {
     width: 100%;
-    height: 500px;
+    overflow: hidden;
     position: relative;
+    height: 30px;
+}
+
+.texto-movimiento {
+    display: inline-block;
+    white-space: nowrap;
+    padding: 0 20px;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.hero {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+    background-color: #8b7355;
+}
+
+.hero-slides {
+    position: relative;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
 }
 
 .hero-slide {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    transform: translateX(100%);
+    transition: transform 0.8s ease;
+    opacity: 1;
+    z-index: 1;
 }
 
 .hero-slide.active {
-    opacity: 1;
+    transform: translateX(0);
+    z-index: 2;
+}
+
+.hero-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .hero-content {
@@ -1699,140 +1704,103 @@ footer {
     transform: translate(-50%, -50%);
     text-align: center;
     color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    z-index: 2;
+    z-index: 3;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 800px;
 }
 
-.hero-content h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    font-family: 'Cormorant Garamond', serif;
-}
-
-.hero-content p {
-    font-size: 1.5rem;
-    font-family: 'Poppins', sans-serif;
-}
-
-.producto-imagen {
-    position: relative;
-    width: 100%;
-    margin-bottom: 1rem;
-}
-
-.miniaturas {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-    justify-content: center;
-}
-
-.miniatura {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.miniatura:hover {
-    transform: scale(1.1);
-}
-
-.carrusel-producto {
-    position: relative;
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.carrusel-imagenes {
-    position: relative;
-    width: 100%;
-    height: 400px;
-    overflow: hidden;
-    border-radius: 8px;
-}
-
-.carrusel-slide {
+.hero-dots {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-}
-
-.carrusel-slide.activo {
-    opacity: 1;
-}
-
-.carrusel-slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.carrusel-control {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    padding: 15px;
-    cursor: pointer;
-    border-radius: 50%;
-    font-size: 18px;
-    transition: background-color 0.3s;
-}
-
-.carrusel-control:hover {
-    background: rgba(0, 0, 0, 0.8);
-}
-
-.carrusel-control.prev {
-    left: 10px;
-}
-
-.carrusel-control.next {
-    right: 10px;
-}
-
-.carrusel-dots {
-    position: absolute;
-    bottom: 10px;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 8px;
+    gap: 10px;
+    z-index: 3;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
 }
 
-.dot {
-    width: 10px;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.5);
+.hero-dot {
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 0;
 }
 
-.dot.activo {
-    background: white;
+.hero-dot:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.2);
 }
 
-.producto-detalle {
+.hero-dot.active {
+    background-color: white;
+    transform: scale(1.2);
+}
+
+/* Estilos para las flechas de navegación del hero */
+.hero-nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
     display: flex;
-    gap: 2rem;
-    padding: 2rem;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    text-align: center;
+    line-height: 1;
+    padding: 0;
+    opacity: 0.8;
 }
 
-@media (max-width: 768px) {
-    .producto-detalle {
-        flex-direction: column;
-    }
-    
-    .carrusel-imagenes {
-        height: 300px;
-    }
+.hero-nav-arrow:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+    transform: translateY(-50%) scale(1.1);
+    opacity: 1;
+}
+
+.hero-nav-prev {
+    left: 20px;
+}
+
+.hero-nav-next {
+    right: 20px;
+}
+
+/* Asegurar que la estructura del hero permita que las flechas sean visibles */
+.hero {
+    position: relative;
+    overflow: visible;
+}
+
+/* Botón de cerrar */
+.btn-cerrar-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    z-index: 10;
 } 

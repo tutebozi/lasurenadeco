@@ -148,10 +148,10 @@ body {
 }
 
 .acciones {
-    display: flex;
-    gap: 1rem;
-    margin-top: auto;
-    padding-top: 1rem;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    text-align: right;
 }
 
 .acciones button {
@@ -224,28 +224,27 @@ body {
 }
 
 .campo {
-    margin-bottom: 1.5rem;
+    margin-bottom: 15px;
 }
 
 .campo label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 5px;
+    color: #333;
     font-weight: 500;
 }
 
-.campo input,
-.campo select,
-.campo textarea {
+.input-field {
     width: 100%;
-    padding: 0.8rem;
+    padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 1rem;
+    font-size: 14px;
 }
 
-.campo textarea {
-    min-height: 100px;
-    resize: vertical;
+.input-field:focus {
+    border-color: #8b7355;
+    outline: none;
 }
 
 .galeria-imagenes {
@@ -295,12 +294,18 @@ body {
 }
 
 .btn-guardar {
-    background-color: var(--accent-color);
+    background-color: #8b7355;
     color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 .btn-guardar:hover {
-    background-color: var(--accent-color-dark);
+    background-color: #725f46;
 }
 
 .btn-cancelar {
@@ -407,4 +412,168 @@ body {
 .campo select option:hover {
     background-color: var(--accent-color);
     color: white;
+}
+
+/* Estilos para la sección de texto en movimiento */
+.seccion-texto-movimiento {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.seccion-texto-movimiento h2 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.campo-texto-movimiento {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.campo-texto-movimiento textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.campo-texto-movimiento textarea:focus {
+    border-color: #8b7355;
+    outline: none;
+}
+
+#btnGuardarTexto {
+    align-self: flex-start;
+    padding: 8px 16px;
+    background-color: #8b7355;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#btnGuardarTexto:hover {
+    background-color: #725f46;
+}
+
+/* Estilos para la vista previa del texto en movimiento */
+.preview-banner {
+    margin-top: 30px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.preview-banner h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.2em;
+}
+
+.banner-preview {
+    background-color: #D2C1B0;
+    padding: 12px 0;
+    overflow: hidden;
+    position: relative;
+    border-radius: 4px;
+}
+
+.texto-movimiento-preview {
+    white-space: nowrap;
+    animation: previewMoverTexto 10s linear infinite;
+    color: #333;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+@keyframes previewMoverTexto {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.descripcion {
+    color: #666;
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.mensaje {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.mensaje.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.mensaje.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.hero-imagenes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.imagen-hero-container {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.imagen-hero-container label {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: 500;
+}
+
+.hero-file-input {
+    margin-bottom: 10px;
+}
+
+.preview-container {
+    width: 100%;
+    height: 150px;
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.hero-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+.imagenes-hero h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.2em;
 } 

@@ -15,14 +15,14 @@
             <h1>Panel Admin</h1>
             <nav>
                 <ul>
-                    <li><a href="#productos" class="active" data-section="productos">
+                    <li><a href="#productos" data-section="productos">
                         <i class="fas fa-box"></i> Productos
-                    </a></li>
-                    <li><a href="#banner" data-section="banner">
-                        <i class="fas fa-image"></i> Banner
                     </a></li>
                     <li><a href="#hero" data-section="hero">
                         <i class="fas fa-images"></i> Hero
+                    </a></li>
+                    <li><a href="#texto-movimiento" data-section="texto-movimiento">
+                        <i class="fas fa-scroll"></i> Texto Movimiento
                     </a></li>
                 </ul>
             </nav>
@@ -30,6 +30,16 @@
 
         <main id="main-content" class="content">
             <!-- El contenido se cargará dinámicamente aquí -->
+            <button id="btnAgregarProducto" class="btn-agregar">Agregar Producto</button>
+            
+            <!-- Sección de Texto en Movimiento -->
+            <div class="seccion-texto-movimiento">
+                <h2>Texto en Movimiento</h2>
+                <div class="campo-texto-movimiento">
+                    <textarea id="textoMovimiento" rows="3" placeholder="Ingresa el texto para el banner en movimiento..."></textarea>
+                    <button id="btnGuardarTexto" class="btn-guardar">Guardar Texto</button>
+                </div>
+            </div>
         </main>
     </div>
 

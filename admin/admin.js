@@ -15,18 +15,99 @@ function editarBanner() {
 
 function editarHero() {
     const mainContent = document.getElementById('main-content');
+    
+    // Cargar datos del hero desde localStorage
+    let titulo = 'LA SUREÑA DECO';
+    let subtitulo = 'HOME, BAZAR Y REGALERÍA';
+    let imagenes = [];
+    
+    try {
+        // Intentar cargar desde heroData (forma actualizada)
+        const heroData = localStorage.getItem('heroData');
+        if (heroData) {
+            const data = JSON.parse(heroData);
+            titulo = data.titulo || titulo;
+            subtitulo = data.subtitulo || subtitulo;
+            
+            if (data.imagenes && Array.isArray(data.imagenes)) {
+                imagenes = data.imagenes.filter(img => img && (
+                    img.startsWith('data:image/') || 
+                    /^https?:\/\/.+/.test(img)
+                ));
+            }
+            console.log('Imágenes cargadas desde heroData:', imagenes.length);
+        } else {
+            // Intentar cargar imágenes del método antiguo como respaldo
+            const heroImagenes = localStorage.getItem('heroImagenes');
+            if (heroImagenes) {
+                imagenes = JSON.parse(heroImagenes || '[]');
+                console.log('Imágenes cargadas desde heroImagenes:', imagenes.length);
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar datos del hero:', error);
+    }
+    
     mainContent.innerHTML = `
         <div class="panel">
             <h2>Editor de Hero</h2>
             <div class="editor-container">
-                <img src="../img/hero.jpg" alt="Hero actual" style="max-width: 100%; margin-bottom: 20px;">
-                <input type="text" id="heroTitulo" value="LA SUREÑA DECO" class="input-field">
-                <input type="text" id="heroSubtitulo" value="HOME, BAZAR Y REGALERÍA" class="input-field">
-                <input type="file" id="heroFile" accept="image/*">
-                <button onclick="guardarHero()" class="btn-accion">Guardar Hero</button>
+                <div class="campo">
+                    <label for="heroTitulo">Título:</label>
+                    <input type="text" id="heroTitulo" value="${titulo}" class="input-field">
+                </div>
+                <div class="campo">
+                    <label for="heroSubtitulo">Subtítulo:</label>
+                    <input type="text" id="heroSubtitulo" value="${subtitulo}" class="input-field">
+                </div>
+                <div class="imagenes-hero">
+                    <h3>Imágenes del Hero (Máximo 3)</h3>
+                    <div class="hero-imagenes-grid">
+                        ${[0, 1, 2].map(index => `
+                            <div class="imagen-hero-container">
+                                <label>Imagen ${index + 1}:</label>
+                                <input type="file" id="heroFile${index}" accept="image/*" class="hero-file-input">
+                                <div class="preview-container">
+                                    <img src="${index < imagenes.length ? imagenes[index] : ''}" 
+                                         id="preview${index}" 
+                                         class="hero-preview" 
+                                         style="display: ${index < imagenes.length && imagenes[index] ? 'block' : 'none'}"
+                                         alt="Preview ${index + 1}">
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="acciones">
+                    <button onclick="guardarHero()" class="btn-guardar">Guardar Cambios</button>
+                </div>
+                <div id="mensajeTexto" class="mensaje" style="display: none;"></div>
                 </div>
         </div>
     `;
+
+    // Agregar eventos para previsualizar las imágenes
+    [0, 1, 2].forEach(index => {
+        const fileInput = document.getElementById(`heroFile${index}`);
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                const preview = document.getElementById(`preview${index}`);
+                if (this.files && this.files[0] && preview) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+        
+        // Mostrar las imágenes cargadas
+        if (index < imagenes.length && imagenes[index]) {
+            console.log(`Mostrando imagen ${index + 1} en preview`);
+        }
+    });
 }
 
 function editarAnuncios() {
@@ -518,12 +599,52 @@ function cambiarSeccion(seccion) {
         case 'productos':
             cargarSeccionProductos();
             break;
-        case 'banner':
-            // Implementar carga de sección banner
-            break;
         case 'hero':
-            // Implementar carga de sección hero
+            editarHero();
             break;
+        case 'texto-movimiento':
+            mostrarSeccionTextoMovimiento();
+            break;
+    }
+}
+
+function mostrarSeccionTextoMovimiento() {
+    const mainContent = document.getElementById('main-content');
+    const textoGuardado = localStorage.getItem('textoMovimiento') || '';
+    
+    mainContent.innerHTML = `
+        <div class="seccion-texto-movimiento">
+            <h2>Texto en Movimiento</h2>
+            <div class="campo-texto-movimiento">
+                <p class="descripcion">Este texto aparecerá en movimiento en la línea beige de la página principal.</p>
+                <textarea id="textoMovimiento" rows="3" placeholder="Ingresa el texto para el banner en movimiento...">${textoGuardado}</textarea>
+                <button id="btnGuardarTexto" class="btn-guardar">Guardar Texto</button>
+                <div id="mensajeTexto" class="mensaje" style="display: none;"></div>
+            </div>
+            <div class="preview-banner">
+                <h3>Vista previa:</h3>
+                <div class="banner-preview">
+                    <div class="texto-movimiento-preview">${textoGuardado || '¡Bienvenidos a LA SUREÑA DECO! 🌟 Descuentos especiales en todos nuestros productos'}</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Agregar evento al botón de guardar
+    const btnGuardarTexto = document.getElementById('btnGuardarTexto');
+    if (btnGuardarTexto) {
+        btnGuardarTexto.addEventListener('click', guardarTextoMovimiento);
+    }
+
+    // Agregar evento para actualizar la vista previa mientras se escribe
+    const textarea = document.getElementById('textoMovimiento');
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            const preview = document.querySelector('.texto-movimiento-preview');
+            if (preview) {
+                preview.textContent = this.value || '¡Bienvenidos a LA SUREÑA DECO! 🌟 Descuentos especiales en todos nuestros productos';
+            }
+        });
     }
 }
 
@@ -582,3 +703,269 @@ styles.textContent = `
     }
 `;
 document.head.appendChild(styles); 
+
+// Funciones para el texto en movimiento
+document.addEventListener('DOMContentLoaded', function() {
+    cargarTextoMovimiento();
+    
+    const btnGuardarTexto = document.getElementById('btnGuardarTexto');
+    if (btnGuardarTexto) {
+        btnGuardarTexto.addEventListener('click', guardarTextoMovimiento);
+    }
+});
+
+function cargarTextoMovimiento() {
+    const textoGuardado = localStorage.getItem('textoMovimiento') || '';
+    const textarea = document.getElementById('textoMovimiento');
+    if (textarea) {
+        textarea.value = textoGuardado;
+    }
+}
+
+function mostrarMensaje(texto, tipo) {
+    const mensajeElement = document.getElementById('mensajeTexto');
+    if (mensajeElement) {
+        mensajeElement.textContent = texto;
+        mensajeElement.className = `mensaje ${tipo}`;
+        mensajeElement.style.display = 'block';
+        
+        // Ocultar el mensaje después de 3 segundos
+        setTimeout(() => {
+            mensajeElement.style.display = 'none';
+        }, 3000);
+    }
+}
+
+function guardarTextoMovimiento() {
+    const textarea = document.getElementById('textoMovimiento');
+    const texto = textarea.value.trim();
+    
+    if (texto === '') {
+        mostrarMensaje('Por favor, ingresa un texto para el banner', 'error');
+        return;
+    }
+    
+    // Guardar el texto en localStorage
+    localStorage.setItem('textoMovimiento', texto);
+    
+    // Forzar una actualización en localStorage
+    const timestamp = Date.now();
+    localStorage.setItem('textoMovimientoTimestamp', timestamp);
+    
+    // Actualizar la vista previa
+    const preview = document.querySelector('.texto-movimiento-preview');
+    if (preview) {
+        preview.textContent = texto;
+    }
+    
+    // Disparar un evento personalizado
+    const event = new CustomEvent('textoMovimientoActualizado', { 
+        detail: { texto, timestamp } 
+    });
+    window.dispatchEvent(event);
+    
+    // Notificar a la página principal si está abierta
+    if (window.opener) {
+        window.opener.postMessage({
+            type: 'textoMovimientoActualizado',
+            texto: texto,
+            timestamp: timestamp
+        }, '*');
+    }
+    
+    // Forzar una actualización en localStorage para otras ventanas
+    const tempKey = 'temp_' + Date.now();
+    localStorage.setItem(tempKey, '1');
+    setTimeout(() => localStorage.removeItem(tempKey), 100);
+    
+    mostrarMensaje('Texto guardado exitosamente', 'success');
+}
+
+async function guardarHero() {
+    const titulo = document.getElementById('heroTitulo').value;
+    const subtitulo = document.getElementById('heroSubtitulo').value;
+    const imagenesComprimidas = [];
+    const defaultImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzhiNzM1NSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5MQSBTVVJF0UEgREVDTzwvdGV4dD48L3N2Zz4=';
+    
+    try {
+        // Limpiar localStorage de datos antiguos
+        localStorage.removeItem('heroImagenes');
+        
+        // Procesar cada imagen
+        for (let i = 0; i < 3; i++) {
+            const fileInput = document.getElementById(`heroFile${i}`);
+            const preview = document.getElementById(`preview${i}`);
+            
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                try {
+                    const imagenComprimida = await comprimirImagen(fileInput.files[0]);
+                    if (imagenComprimida && imagenComprimida.startsWith('data:image/')) {
+                        imagenesComprimidas.push(imagenComprimida);
+                    }
+                } catch (error) {
+                    console.error(`Error al comprimir imagen ${i}:`, error);
+                }
+            } else if (preview && 
+                      preview.src && 
+                      preview.style.display !== 'none' && 
+                      preview.src.startsWith('data:image/')) {
+                imagenesComprimidas.push(preview.src);
+            }
+        }
+        
+        // Si no hay imágenes válidas, usar imagen por defecto
+        if (imagenesComprimidas.length === 0) {
+            imagenesComprimidas.push(defaultImage);
+        }
+        
+        // Crear el objeto heroData
+        const heroData = {
+            id: Date.now(),
+            titulo,
+            subtitulo,
+            imagenes: imagenesComprimidas
+        };
+        
+        // Guardar solo en heroData
+        localStorage.setItem('heroData', JSON.stringify(heroData));
+        
+        // Limpiar los previews y inputs
+        for (let i = 0; i < 3; i++) {
+            const fileInput = document.getElementById(`heroFile${i}`);
+            const preview = document.getElementById(`preview${i}`);
+            if (fileInput) fileInput.value = '';
+            if (preview) {
+                preview.src = defaultImage;
+                preview.style.display = 'none';
+            }
+        }
+        
+        mostrarMensaje('Hero guardado exitosamente', 'success');
+        
+        // Notificar a la página principal
+        if (window.opener) {
+            window.opener.postMessage({
+                type: 'heroUpdated',
+                heroData: heroData
+            }, '*');
+        }
+        
+    } catch (error) {
+        console.error('Error al guardar el hero:', error);
+        mostrarMensaje('Error al guardar el hero: ' + error.message, 'error');
+    }
+}
+
+// Función para comprimir imagen
+async function comprimirImagen(file) {
+    return new Promise((resolve, reject) => {
+        try {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Calcular dimensiones manteniendo proporción
+                        let width = img.width;
+                        let height = img.height;
+                        const maxSize = 1200;
+                        
+                        if (width > height && width > maxSize) {
+                            height = (height * maxSize) / width;
+                            width = maxSize;
+                        } else if (height > maxSize) {
+                            width = (width * maxSize) / height;
+                            height = maxSize;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        // Dibujar y comprimir
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        
+                        resolve(dataUrl);
+                    } catch (error) {
+                        console.error('Error al procesar la imagen en canvas:', error);
+                        reject(error);
+                    }
+                };
+                img.onerror = function() {
+                    console.error('Error al cargar la imagen');
+                    reject(new Error('Error al cargar la imagen'));
+                };
+                img.src = e.target.result;
+            };
+            reader.onerror = function(error) {
+                console.error('Error al leer el archivo:', error);
+                reject(error);
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('Error en comprimirImagen:', error);
+            reject(error);
+        }
+    });
+}
+
+// Función para cargar el hero al iniciar
+function cargarHero() {
+    // Obtener datos del hero desde localStorage
+    let titulo = 'LA SUREÑA DECO';
+    let subtitulo = 'HOME, BAZAR Y REGALERÍA';
+    let imagenes = [];
+    
+    try {
+        // Intentar cargar desde heroData (forma actualizada)
+        const heroData = localStorage.getItem('heroData');
+        if (heroData) {
+            const data = JSON.parse(heroData);
+            titulo = data.titulo || titulo;
+            subtitulo = data.subtitulo || subtitulo;
+            
+            if (data.imagenes && Array.isArray(data.imagenes)) {
+                imagenes = data.imagenes.filter(img => img && (
+                    img.startsWith('data:image/') || 
+                    /^https?:\/\/.+/.test(img)
+                ));
+            }
+            console.log('Imágenes cargadas desde heroData:', imagenes.length);
+        } else {
+            // Intentar cargar imágenes del método antiguo como respaldo
+            const heroImagenes = localStorage.getItem('heroImagenes');
+            if (heroImagenes) {
+                imagenes = JSON.parse(heroImagenes);
+                console.log('Imágenes cargadas desde heroImagenes:', imagenes.length);
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar datos del hero:', error);
+    }
+    
+    // Actualizar los campos en la interfaz
+    const heroTituloInput = document.getElementById('heroTitulo');
+    const heroSubtituloInput = document.getElementById('heroSubtitulo');
+    
+    if (heroTituloInput) heroTituloInput.value = titulo;
+    if (heroSubtituloInput) heroSubtituloInput.value = subtitulo;
+    
+    // Actualizar las previsualizaciones de imágenes
+    for (let i = 0; i < 3; i++) {
+        const preview = document.getElementById(`preview${i}`);
+        if (preview) {
+            if (i < imagenes.length && imagenes[i]) {
+                preview.src = imagenes[i];
+                preview.style.display = 'block';
+                console.log(`Imagen ${i + 1} cargada:`, preview.src.substring(0, 50) + '...');
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+    }
+    
+    console.log('Hero cargado con éxito');
+} 
