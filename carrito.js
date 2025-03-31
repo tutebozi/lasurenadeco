@@ -84,11 +84,20 @@ function agregarAlCarrito(producto) {
     if (itemExistente) {
         itemExistente.cantidad++;
     } else {
+        // Obtener la imagen de forma segura
+        let imagen = producto.imagen;
+        if (!imagen && producto.imagenes) {
+            imagen = Array.isArray(producto.imagenes) ? producto.imagenes[0] : producto.imagenes;
+        }
+        if (!imagen) {
+            imagen = 'https://dummyimage.com/300x300/cccccc/ffffff&text=' + encodeURIComponent(producto.nombre);
+        }
+
         carrito.push({
             id: producto.id,
             nombre: producto.nombre,
             precio: producto.precio,
-            imagen: producto.imagenes[0],
+            imagen: imagen,
             cantidad: 1
         });
     }
@@ -234,4 +243,220 @@ document.addEventListener('DOMContentLoaded', function() {
 window.limpiarLocalStorage = limpiarLocalStorage;
 window.reiniciarCarrito = reiniciarCarrito;
 window.agregarAlCarrito = agregarAlCarrito;
-window.actualizarContadorCarrito = actualizarContadorCarrito; 
+window.actualizarContadorCarrito = actualizarContadorCarrito;
+
+// Módulo del carrito
+const CarritoModule = {
+    carrito: [],
+
+    init() {
+        console.log('Inicializando CarritoModule...');
+        this.carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        this.actualizarContador();
+        
+        // Agregar evento de clic al icono del carrito
+        document.addEventListener('DOMContentLoaded', () => {
+            const cartIcon = document.querySelector('.cart-icon, [class*="cart"]');
+            if (cartIcon) {
+                cartIcon.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.abrirCarrito();
+                });
+            }
+            this.actualizarContador();
+        });
+    },
+
+    agregarProducto(producto) {
+        if (!producto || !producto.id) {
+            console.error('Producto inválido:', producto);
+            return;
+        }
+
+        try {
+            const itemExistente = this.carrito.find(item => item.id === producto.id);
+            
+            if (itemExistente) {
+                itemExistente.cantidad = (itemExistente.cantidad || 1) + 1;
+            } else {
+                // Obtener la imagen de forma segura
+                let imagen = producto.imagen;
+                if (!imagen && producto.imagenes) {
+                    imagen = Array.isArray(producto.imagenes) ? producto.imagenes[0] : producto.imagenes;
+                }
+                if (!imagen) {
+                    imagen = 'https://dummyimage.com/300x300/cccccc/ffffff&text=' + encodeURIComponent(producto.nombre);
+                }
+
+                this.carrito.push({
+                    id: producto.id,
+                    nombre: producto.nombre,
+                    precio: Number(producto.precio),
+                    imagen: imagen,
+                    cantidad: 1
+                });
+            }
+            
+            this.guardarCarrito();
+            this.mostrarMensaje('¡Producto agregado al carrito!');
+        } catch (error) {
+            console.error('Error al agregar producto:', error);
+            this.mostrarMensaje('Error al agregar el producto', 'error');
+        }
+    },
+
+    actualizarContador() {
+        const contador = document.querySelector('.cart-count');
+        if (contador) {
+            const totalItems = this.carrito.reduce((total, item) => total + (Number(item.cantidad) || 0), 0);
+            contador.textContent = totalItems;
+            contador.style.display = totalItems > 0 ? 'block' : 'none';
+        }
+    },
+
+    mostrarMensaje(mensaje, tipo = 'success') {
+        const mensajeDiv = document.createElement('div');
+        mensajeDiv.className = `mensaje-flotante mensaje-${tipo}`;
+        mensajeDiv.textContent = mensaje;
+        document.body.appendChild(mensajeDiv);
+        
+        setTimeout(() => {
+            mensajeDiv.classList.add('fadeout');
+            setTimeout(() => mensajeDiv.remove(), 300);
+        }, 2000);
+    },
+
+    abrirCarrito() {
+        const modalCarrito = document.createElement('div');
+        modalCarrito.className = 'modal-carrito';
+        
+        try {
+            const total = this.carrito.reduce((sum, item) => {
+                const precio = Number(item.precio) || 0;
+                const cantidad = Number(item.cantidad) || 0;
+                return sum + (precio * cantidad);
+            }, 0);
+            
+            modalCarrito.innerHTML = `
+                <div class="modal-contenido-carrito">
+                    <div class="carrito-header">
+                        <h2>Tu Carrito</h2>
+                        <button class="btn-cerrar" onclick="CarritoModule.cerrarCarrito()">&times;</button>
+                    </div>
+                    <div class="items-carrito">
+                        ${this.carrito.length === 0 ? '<p class="carrito-vacio">Tu carrito está vacío</p>' : 
+                            this.carrito.map(item => {
+                                const imagenUrl = item.imagen || 'https://dummyimage.com/300x300/cccccc/ffffff&text=Imagen+no+disponible';
+                                const precio = Number(item.precio) || 0;
+                                const cantidad = Number(item.cantidad) || 0;
+                                
+                                return `
+                                    <div class="item-carrito">
+                                        <img 
+                                            src="${imagenUrl}" 
+                                            alt="${item.nombre}"
+                                            onerror="this.src='https://dummyimage.com/300x300/cccccc/ffffff&text=Imagen+no+disponible'"
+                                        >
+                                        <div class="item-info">
+                                            <h3>${item.nombre}</h3>
+                                            <p class="precio">$${precio.toLocaleString()}</p>
+                                            <div class="cantidad-controles">
+                                                <button onclick="CarritoModule.cambiarCantidad('${item.id}', -1)">-</button>
+                                                <span>${cantidad}</span>
+                                                <button onclick="CarritoModule.cambiarCantidad('${item.id}', 1)">+</button>
+                                            </div>
+                                        </div>
+                                        <button class="eliminar-item" onclick="CarritoModule.eliminarProducto('${item.id}')">&times;</button>
+                                    </div>
+                                `;
+                            }).join('')
+                        }
+                    </div>
+                    ${this.carrito.length > 0 ? `
+                        <div class="carrito-footer">
+                            <div class="total">
+                                <span>Total:</span>
+                                <span>$${total.toLocaleString()}</span>
+                            </div>
+                            <button class="btn-finalizar" onclick="CarritoModule.finalizarCompra()">Finalizar Compra</button>
+                            <button class="btn-vaciar" onclick="CarritoModule.vaciarCarrito()">Vaciar Carrito</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            document.body.appendChild(modalCarrito);
+        } catch (error) {
+            console.error('Error al abrir el carrito:', error);
+            this.mostrarMensaje('Error al abrir el carrito', 'error');
+        }
+    },
+
+    cerrarCarrito() {
+        const modalCarrito = document.querySelector('.modal-carrito');
+        if (modalCarrito) {
+            modalCarrito.remove();
+        }
+    },
+
+    cambiarCantidad(id, cambio) {
+        const item = this.carrito.find(item => item.id === id);
+        
+        if (item) {
+            item.cantidad = Math.max(1, (Number(item.cantidad) || 1) + cambio);
+            this.guardarCarrito();
+            this.actualizarVistaCarrito();
+        }
+    },
+
+    eliminarProducto(id) {
+        const index = this.carrito.findIndex(item => item.id === id);
+        if (index > -1) {
+            this.carrito.splice(index, 1);
+            this.guardarCarrito();
+            this.actualizarVistaCarrito();
+            this.mostrarMensaje('Producto eliminado del carrito');
+        }
+    },
+
+    actualizarVistaCarrito() {
+        const modalCarrito = document.querySelector('.modal-carrito');
+        if (modalCarrito) {
+            modalCarrito.remove();
+            this.abrirCarrito();
+        }
+    },
+
+    vaciarCarrito() {
+        if (confirm('¿Estás seguro de que deseas vaciar el carrito?')) {
+            this.carrito = [];
+            this.guardarCarrito();
+            this.actualizarVistaCarrito();
+            this.mostrarMensaje('Carrito vaciado');
+        }
+    },
+
+    finalizarCompra() {
+        if (this.carrito.length === 0) {
+            this.mostrarMensaje('El carrito está vacío', 'error');
+            return;
+        }
+        
+        alert('¡Gracias por tu compra! Pronto implementaremos el proceso de pago.');
+        this.carrito = [];
+        this.guardarCarrito();
+        this.cerrarCarrito();
+        this.mostrarMensaje('¡Compra finalizada con éxito!');
+    },
+
+    guardarCarrito() {
+        localStorage.setItem('carrito', JSON.stringify(this.carrito));
+        this.actualizarContador();
+    }
+};
+
+// Inicializar el módulo
+CarritoModule.init();
+
+// Exponer el módulo globalmente
+window.CarritoModule = CarritoModule; 

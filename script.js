@@ -16,8 +16,7 @@ function cargarBanner() {
 // Función para cargar productos
 function cargarProductos(seccion) {
     try {
-    const productos = JSON.parse(localStorage.getItem('productos')) || [];
-        console.log('Cargando productos:', productos); // Para depuración
+        const productos = JSON.parse(localStorage.getItem('productos')) || [];
         const contenedor = document.querySelector('.productos-container');
         
         if (!contenedor) {
@@ -53,12 +52,17 @@ function cargarProductos(seccion) {
                                         onclick="event.stopPropagation(); cambiarImagenProducto(this, '${producto.id}', ${idx})"
                                     >
                                 `).join('')}
-                        </div>
+                            </div>
                         ` : ''}
                     </div>
                     <h3>${producto.nombre}</h3>
                     <p class="precio">$${producto.precio.toLocaleString()}</p>
-                    <button class="btn-agregar" onclick="event.stopPropagation(); agregarAlCarrito(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
+                    <button class="btn-agregar" onclick="CarritoModule.agregarProducto({
+                        id: '${producto.id}',
+                        nombre: '${producto.nombre.replace(/'/g, "\\'")}',
+                        precio: ${producto.precio},
+                        imagen: '${imagenPrincipal}'
+                    })">
                         Agregar al Carrito
                     </button>
                 </div>
@@ -86,7 +90,6 @@ function mostrarDetallesProducto(producto) {
     try {
         console.log('Mostrando detalles del producto:', producto);
         
-        // Obtener todas las imágenes del producto
         const imagenes = producto.imagenes || [producto.imagen];
         const imagenPrincipal = imagenes[0] || 'https://dummyimage.com/400x400/cccccc/ffffff&text=' + encodeURIComponent(producto.nombre);
         
@@ -111,7 +114,7 @@ function mostrarDetallesProducto(producto) {
                                             onclick="cambiarImagenPrincipal(this, ${index})"
                                         >
                                     `).join('')}
-                </div>
+                                </div>
                             ` : ''}
                         </div>
                         <div class="producto-info">
@@ -119,20 +122,23 @@ function mostrarDetallesProducto(producto) {
                             <p class="precio">$${producto.precio.toLocaleString()}</p>
                             <p class="descripcion">${producto.descripcion || ''}</p>
                             <div class="acciones">
-                                <button class="btn-agregar" onclick="agregarAlCarrito(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
+                                <button class="btn-agregar" onclick="CarritoModule.agregarProducto({
+                                    id: '${producto.id}',
+                                    nombre: '${producto.nombre.replace(/'/g, "\\'")}',
+                                    precio: ${producto.precio},
+                                    imagen: '${imagenPrincipal}'
+                                })">
                                     Agregar al Carrito
                                 </button>
-                    </div>
+                            </div>
                         </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
 
-        // Agregar el modal al DOM
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         
-        // Manejar el cierre del modal
         const modal = document.querySelector('.modal-producto');
         const btnCerrar = modal.querySelector('.btn-cerrar');
         
@@ -317,7 +323,7 @@ function cargarHero() {
         // Actualizar el DOM
         const heroSlides = document.querySelector('.hero-slides');
         const heroDots = document.querySelector('.hero-dots');
-        
+
         // Ocultar el título y subtítulo del hero
         const heroContent = document.querySelector('.hero-content');
         if (heroContent) {
@@ -538,7 +544,7 @@ window.addEventListener('storage', function(e) {
     }
 });
 
-// Hacer funciones disponibles globalmente
+// Exponer las funciones necesarias globalmente
 window.cargarBanner = cargarBanner;
 window.cargarProductos = cargarProductos;
 window.mostrarDetallesProducto = mostrarDetallesProducto;
@@ -548,87 +554,5 @@ window.cambiarSlide = cambiarSlide;
 window.cargarHero = cargarHero;
 window.cargarAnuncios = cargarAnuncios;
 window.iniciarCarrusel = iniciarCarruselDirecto;
-window.cargarTextoMovimiento = cargarTextoMovimiento; // Exponer la función globalmente
+window.cargarTextoMovimiento = cargarTextoMovimiento;
 
-function mostrarDetalleProducto(producto) {
-    const modal = document.getElementById('modal-producto');
-    modal.innerHTML = `
-        <div class="modal-contenido">
-            <span class="cerrar" onclick="cerrarModalProducto()">&times;</span>
-            <div class="producto-detalle">
-                <div class="carrusel-producto">
-                    <div class="carrusel-imagenes">
-                        ${producto.imagenes.map((imagen, index) => `
-                            <div class="carrusel-slide ${index === 0 ? 'activo' : ''}">
-                                <img src="${imagen}" alt="${producto.nombre} - Imagen ${index + 1}">
-                            </div>
-                        `).join('')}
-                    </div>
-                    ${producto.imagenes.length > 1 ? `
-                        <button class="carrusel-control prev" onclick="cambiarSlideProducto(-1)">&#10094;</button>
-                        <button class="carrusel-control next" onclick="cambiarSlideProducto(1)">&#10095;</button>
-                        <div class="carrusel-dots">
-                            ${producto.imagenes.map((_, index) => `
-                                <span class="dot ${index === 0 ? 'activo' : ''}" onclick="irASlideProducto(${index})"></span>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                </div>
-                <div class="producto-info">
-                    <h2>${producto.nombre}</h2>
-                    <p class="precio">$${producto.precio.toLocaleString()}</p>
-                    <p class="descripcion">${producto.descripcion}</p>
-                    <div class="cantidad">
-                        <button onclick="cambiarCantidad(-1)">-</button>
-                        <span id="cantidad">1</span>
-                        <button onclick="cambiarCantidad(1)">+</button>
-                    </div>
-                    <button class="btn-agregar" onclick="agregarAlCarrito(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
-                        Agregar al carrito
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    modal.style.display = 'block';
-    slideIndex = 0;
-}
-
-let slideIndex = 0;
-
-function cambiarSlideProducto(n) {
-    mostrarSlideProducto(slideIndex + n);
-}
-
-function irASlideProducto(n) {
-    mostrarSlideProducto(n);
-}
-
-function mostrarSlideProducto(n) {
-    const slides = document.querySelectorAll('.carrusel-slide');
-    const dots = document.querySelectorAll('.dot');
-    
-    if (!slides.length) return;
-    
-    // Ajustar el índice si se pasa de los límites
-    if (n >= slides.length) {
-        slideIndex = 0;
-    } else if (n < 0) {
-        slideIndex = slides.length - 1;
-    } else {
-        slideIndex = n;
-    }
-    
-    // Ocultar todos los slides
-    slides.forEach(slide => slide.classList.remove('activo'));
-    dots.forEach(dot => dot.classList.remove('activo'));
-    
-    // Mostrar el slide actual
-    slides[slideIndex].classList.add('activo');
-    dots[slideIndex].classList.add('activo');
-}
-
-// Exponer las funciones para el detalle del producto
-window.mostrarDetalleProducto = mostrarDetalleProducto;
-window.cambiarSlideProducto = cambiarSlideProducto;
-window.irASlideProducto = irASlideProducto;
