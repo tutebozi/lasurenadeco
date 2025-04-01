@@ -65,48 +65,43 @@ function cerrarCarrito() {
 
 // Función para optimizar imagen antes de guardar
 function optimizarImagen(imagenUrl) {
-    if (!imagenUrl) return '';
-    // Si es una URL de datos (base64), la recortamos para ahorrar espacio
-    if (imagenUrl.startsWith('data:image')) {
-        return imagenUrl.substring(0, 100) + '...';
+    if (!imagenUrl) return 'https://dummyimage.com/300x300/cccccc/ffffff&text=Imagen+no+disponible';
+    
+    // Si es una URL de datos (base64), verificamos que sea válida
+    if (imagenUrl.startsWith('data:image/')) {
+        return imagenUrl; // Mantener la imagen base64 completa sin modificar
     }
-    return imagenUrl;
+    
+    // Si es una URL normal, verificar que sea válida
+    try {
+        new URL(imagenUrl);
+        return imagenUrl;
+    } catch {
+        return 'https://dummyimage.com/300x300/cccccc/ffffff&text=Imagen+no+disponible';
+    }
 }
 
 // Función para guardar el carrito en localStorage
 function guardarCarrito() {
     try {
-        // Optimizar el carrito antes de guardar
-        const carritoOptimizado = carrito.map(item => ({
-            id: item.id,
-            nombre: item.nombre,
-            precio: item.precio,
-            imagen: optimizarImagen(item.imagen),
-            cantidad: item.cantidad
-        }));
-
-        // Intentar guardar el carrito optimizado
-        try {
-            localStorage.setItem('carrito', JSON.stringify(carritoOptimizado));
-        } catch (error) {
-            if (error.name === 'QuotaExceededError') {
-                console.warn('Límite de almacenamiento alcanzado, intentando limpiar...');
-                // Intentar guardar sin imágenes
-                const carritoSinImagenes = carritoOptimizado.map(item => ({
-                    id: item.id,
-                    nombre: item.nombre,
-                    precio: item.precio,
-                    cantidad: item.cantidad
-                }));
-                localStorage.setItem('carrito', JSON.stringify(carritoSinImagenes));
-                mostrarMensaje('Carrito guardado sin imágenes debido a limitaciones de espacio', 'warning');
-            } else {
-                throw error;
-            }
-        }
+        // Guardar el carrito sin modificar las imágenes
+        localStorage.setItem('carrito', JSON.stringify(carrito));
     } catch (error) {
-        console.error('Error al guardar el carrito:', error);
-        mostrarMensaje('Error al guardar el carrito', 'error');
+        if (error.name === 'QuotaExceededError') {
+            console.warn('Límite de almacenamiento alcanzado, intentando limpiar...');
+            // Intentar guardar sin imágenes
+            const carritoSinImagenes = carrito.map(item => ({
+                id: item.id,
+                nombre: item.nombre,
+                precio: item.precio,
+                cantidad: item.cantidad,
+                imagen: 'https://dummyimage.com/300x300/cccccc/ffffff&text=' + encodeURIComponent(item.nombre)
+            }));
+            localStorage.setItem('carrito', JSON.stringify(carritoSinImagenes));
+        } else {
+            console.error('Error al guardar el carrito:', error);
+            mostrarMensaje('Error al guardar el carrito', 'error');
+        }
     }
     
     actualizarContadorCarrito();
@@ -129,12 +124,22 @@ function agregarAlCarrito(productoId) {
             itemExistente.cantidad++;
         } else {
             // Obtener la imagen de forma segura
-            let imagen = producto.imagen;
-            if (!imagen && producto.imagenes) {
-                imagen = Array.isArray(producto.imagenes) ? producto.imagenes[0] : producto.imagenes;
+            let imagen = '';
+            if (producto.imagenes && Array.isArray(producto.imagenes) && producto.imagenes.length > 0) {
+                // Asegurarse de que la imagen sea válida
+                for (let img of producto.imagenes) {
+                    if (img && (img.startsWith('data:image/') || img.startsWith('http'))) {
+                        imagen = img;
+                        break;
+                    }
+                }
+            } else if (producto.imagen && (producto.imagen.startsWith('data:image/') || producto.imagen.startsWith('http'))) {
+                imagen = producto.imagen;
             }
+            
+            // Si no se encontró una imagen válida, usar imagen por defecto
             if (!imagen) {
-                imagen = 'https://dummyimage.com/300x300/cccccc/ffffff&text=' + encodeURIComponent(producto.nombre || '');
+                imagen = 'https://dummyimage.com/300x300/cccccc/ffffff&text=' + encodeURIComponent(producto.nombre || 'Producto');
             }
 
             carrito.push({
@@ -241,21 +246,29 @@ function actualizarCarrito() {
         return;
     }
     
-    contenedor.innerHTML = carrito.map(item => `
-        <div class="carrito-item">
-            <img src="${item.imagen}" alt="${item.nombre}" class="carrito-item-imagen">
-            <div class="carrito-item-info">
-                <h3 class="carrito-item-nombre">${item.nombre}</h3>
-                <p class="carrito-item-precio">$${formatearPrecio(item.precio)}</p>
-                <div class="carrito-item-cantidad">
-                    <button class="btn-cantidad" onclick="actualizarCantidad(${item.id}, -1)">-</button>
-                    <span>${item.cantidad}</span>
-                    <button class="btn-cantidad" onclick="actualizarCantidad(${item.id}, 1)">+</button>
+    contenedor.innerHTML = carrito.map(item => {
+        // Validar y optimizar la imagen
+        const imagenUrl = optimizarImagen(item.imagen);
+        
+        return `
+            <div class="carrito-item">
+                <img src="${imagenUrl}" 
+                     alt="${item.nombre}" 
+                     class="carrito-item-imagen"
+                     onerror="this.src='https://dummyimage.com/300x300/cccccc/ffffff&text=${encodeURIComponent(item.nombre)}'; this.onerror=null;">
+                <div class="carrito-item-info">
+                    <h3 class="carrito-item-nombre">${item.nombre}</h3>
+                    <p class="carrito-item-precio">$${formatearPrecio(item.precio)}</p>
+                    <div class="carrito-item-cantidad">
+                        <button class="btn-cantidad" onclick="actualizarCantidad('${item.id}', -1)">-</button>
+                        <span>${item.cantidad}</span>
+                        <button class="btn-cantidad" onclick="actualizarCantidad('${item.id}', 1)">+</button>
+                    </div>
                 </div>
+                <i class="fas fa-trash carrito-item-eliminar" onclick="eliminarDelCarrito('${item.id}')"></i>
             </div>
-            <i class="fas fa-trash carrito-item-eliminar" onclick="eliminarDelCarrito(${item.id})"></i>
-        </div>
-    `).join('');
+        `;
+    }).join('');
     
     const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
     totalElement.textContent = `$${formatearPrecio(total)}`;

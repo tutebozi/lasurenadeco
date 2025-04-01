@@ -16,72 +16,71 @@ function cargarBanner() {
 // Función para cargar productos
 function cargarProductos(seccion) {
     try {
-        const productos = JSON.parse(localStorage.getItem('productos')) || [];
-        const contenedor = document.querySelector('.productos-container');
+        const productosContainer = document.querySelector('.productos-container');
+        if (!productosContainer) return;
+
+        // Limpiar el contenedor
+        productosContainer.innerHTML = '';
+
+        // Obtener productos del localStorage
+        let productos = [];
+        const productosGuardados = localStorage.getItem('productos');
         
-        if (!contenedor) {
-            console.error('No se encontró el contenedor de productos');
+        if (productosGuardados) {
+            productos = JSON.parse(productosGuardados);
+            
+            // Filtrar por sección si se especifica
+            if (seccion && seccion !== 'todos') {
+                productos = productos.filter(p => p.categoria === seccion);
+            }
+        }
+
+        if (productos.length === 0) {
+            productosContainer.innerHTML = '<div class="no-productos"><p>No hay productos disponibles en esta categoría.</p></div>';
             return;
         }
-        
-        let productosFiltrados = productos;
-        if (seccion && seccion !== 'todos') {
-            productosFiltrados = productos.filter(p => p.seccion === seccion);
-        }
-        
-        contenedor.innerHTML = productosFiltrados.map(producto => {
-            const imagenes = producto.imagenes || [producto.imagen];
-            const imagenPrincipal = imagenes[0];
+
+        productos.forEach(producto => {
+            const card = document.createElement('div');
+            card.className = 'producto-card';
             
-            return `
-                <div class="producto-card" data-id="${producto.id}">
-                    <div class="producto-imagen">
-                        <img 
-                            class="imagen-principal"
-                            src="${imagenPrincipal}" 
-                            alt="${producto.nombre}"
-                            onerror="this.src='https://dummyimage.com/300x300/cccccc/ffffff&text=${encodeURIComponent(producto.nombre)}'"
-                        >
-                        ${imagenes.length > 1 ? `
-                            <div class="miniaturas">
-                                ${imagenes.map((img, idx) => `
-                                    <img 
-                                        src="${img}" 
-                                        class="miniatura ${idx === 0 ? 'activa' : ''}"
-                                        alt="${producto.nombre} - imagen ${idx + 1}"
-                                        onclick="event.stopPropagation(); cambiarImagenProducto(this, '${producto.id}', ${idx})"
-                                    >
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                    </div>
+            // Validar y preparar las imágenes
+            let imagenes = [];
+            if (producto.imagenes && Array.isArray(producto.imagenes)) {
+                imagenes = producto.imagenes.filter(img => validarURL(img));
+            }
+            
+            // Si no hay imágenes válidas, usar imagen por defecto
+            if (imagenes.length === 0) {
+                imagenes = [carouselState.defaultImage];
+            }
+
+            card.innerHTML = `
+                <div class="producto-imagen">
+                    <img src="${imagenes[0]}" alt="${producto.nombre}" class="imagen-principal" 
+                         onerror="this.onerror=null; this.src='${carouselState.defaultImage}';">
+                    ${imagenes.length > 1 ? `
+                        <button class="flecha-card flecha-izquierda" onclick="cambiarImagenProducto(this.parentElement, '${producto.id}', 'prev')">&lt;</button>
+                        <button class="flecha-card flecha-derecha" onclick="cambiarImagenProducto(this.parentElement, '${producto.id}', 'next')">&gt;</button>
+                    ` : ''}
+                </div>
+                <div class="producto-detalles">
                     <h3>${producto.nombre}</h3>
-                    <p class="precio">$${producto.precio.toLocaleString()}</p>
-                    <button class="btn-agregar" onclick="CarritoModule.agregarProducto({
-                        id: '${producto.id}',
-                        nombre: '${producto.nombre.replace(/'/g, "\\'")}',
-                        precio: ${producto.precio},
-                        imagen: '${imagenPrincipal}'
-                    })">
-                        Agregar al Carrito
-                    </button>
+                    <p class="producto-precio">$${producto.precio}</p>
+                    <p class="descripcion">${producto.descripcion || ''}</p>
+                    <button class="btn-agregar" onclick="agregarAlCarrito('${producto.id}')">Agregar al carrito</button>
                 </div>
             `;
-        }).join('');
-        
-        // Agregar evento click a las tarjetas de productos
-        document.querySelectorAll('.producto-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const id = card.dataset.id;
-                const producto = productosFiltrados.find(p => p.id.toString() === id);
-                if (producto) {
-                    mostrarDetallesProducto(producto);
-                }
-            });
+
+            productosContainer.appendChild(card);
         });
-        
+
     } catch (error) {
         console.error('Error al cargar productos:', error);
+        const productosContainer = document.querySelector('.productos-container');
+        if (productosContainer) {
+            productosContainer.innerHTML = '<div class="error-mensaje">Error al cargar los productos. Por favor, intente más tarde.</div>';
+        }
     }
 }
 
@@ -245,6 +244,23 @@ function cargarTextoMovimiento() {
     }
 }
 
+function validarURL(url) {
+    if (!url) return false;
+    
+    // Validar URLs de data:image
+    if (url.startsWith('data:image/')) {
+        return url.includes('base64,');
+    }
+    
+    // Validar URLs HTTP/HTTPS
+    try {
+        new URL(url);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 // Estado global del carrusel
 let carouselState = {
     interval: null,
@@ -283,10 +299,7 @@ function cargarHero() {
                 const data = JSON.parse(heroData);
                 
                 if (data.imagenes && Array.isArray(data.imagenes)) {
-                    imagenes = data.imagenes.filter(img => img && (
-                        img.startsWith('data:image/') ||
-                        /^https?:\/\/.+/.test(img)
-                    ));
+                    imagenes = data.imagenes.filter(img => img && validarURL(img));
                     console.log(`Filtradas ${imagenes.length} imágenes válidas de heroData`);
                 }
             } catch (e) {
@@ -300,10 +313,7 @@ function cargarHero() {
                 if (heroImagenes) {
                     const imagenesAntiguas = JSON.parse(heroImagenes);
                     if (Array.isArray(imagenesAntiguas) && imagenesAntiguas.length > 0) {
-                        imagenes = imagenesAntiguas.filter(img => img && (
-                            img.startsWith('data:image/') ||
-                            /^https?:\/\/.+/.test(img)
-                        ));
+                        imagenes = imagenesAntiguas.filter(img => img && validarURL(img));
                         console.log(`Recuperadas ${imagenes.length} imágenes desde heroImagenes`);
                     }
                 }
@@ -340,13 +350,24 @@ function cargarHero() {
                 slide.style.transform = `translateX(${index === 0 ? 0 : 100}%)`;
                 
                 const img = document.createElement('img');
-                img.src = imagen;
                 img.alt = `Hero imagen ${index + 1}`;
+                
+                // Manejar errores de carga de imagen
                 img.onerror = function() {
                     console.error(`Error al cargar imagen ${index + 1}, usando imagen por defecto`);
-                    this.onerror = null;
-                    this.src = carouselState.defaultImage;
+                    this.onerror = null; // Prevenir bucle infinito
+                    if (validarURL(carouselState.defaultImage)) {
+                        this.src = carouselState.defaultImage;
+                    }
                 };
+                
+                // Asignar src después de configurar onerror
+                if (validarURL(imagen)) {
+                    img.src = imagen;
+                } else {
+                    console.error(`URL de imagen inválida para slide ${index + 1}, usando imagen por defecto`);
+                    img.src = carouselState.defaultImage;
+                }
                 
                 slide.appendChild(img);
                 heroSlides.appendChild(slide);
@@ -368,7 +389,7 @@ function cargarHero() {
         if (heroSlides) {
             heroSlides.innerHTML = `
                 <div class="hero-slide active">
-                    <img src="${carouselState.defaultImage}" alt="Hero imagen por defecto">
+                    <img src="${carouselState.defaultImage}" alt="Hero imagen por defecto" onerror="this.style.display='none'">
                 </div>
             `;
             console.log('Fallback de imagen por defecto aplicado');

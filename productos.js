@@ -150,22 +150,95 @@ function formatearPrecio(precio) {
 
 // Función para filtrar productos por categoría
 function filtrarPorCategoria(categoria) {
-    cargarProductos();
+    console.log('Filtrando por categoría:', categoria);
+    const contenedorProductos = document.querySelector('.productos-container');
+    const productos = JSON.parse(localStorage.getItem('productos')) || [];
+    
+    // Filtrar productos por la categoría seleccionada
+    const productosFiltrados = categoria === 'TODOS' ? 
+        productos : 
+        productos.filter(p => p.categoria === categoria);
+    
+    console.log('Productos filtrados:', productosFiltrados);
+
+    // Limpiar el contenedor
+    contenedorProductos.innerHTML = '';
+
+    if (productosFiltrados.length === 0) {
+        contenedorProductos.innerHTML = `
+            <div class="no-productos">
+                <p>No hay productos disponibles en esta categoría.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Mostrar los productos filtrados
+    productosFiltrados.forEach(producto => {
+        // Obtener la imagen principal del producto
+        let imagenPrincipal = '';
+        if (producto.imagen) {
+            // Si tiene una imagen única
+            imagenPrincipal = producto.imagen;
+        } else if (producto.imagenes && producto.imagenes.length > 0) {
+            // Si tiene un array de imágenes
+            imagenPrincipal = producto.imagenes[0];
+        } else {
+            // Si no tiene ninguna imagen
+            imagenPrincipal = 'img/placeholder.jpg';
+        }
+
+        const tieneMultiplesImagenes = producto.imagenes && producto.imagenes.length > 1;
+
+        const productoElement = document.createElement('div');
+        productoElement.className = 'producto-card';
+        productoElement.onclick = () => mostrarDetalleProducto(producto.id);
+
+        productoElement.innerHTML = `
+            <div class="producto-imagen">
+                ${tieneMultiplesImagenes ? `<button class="flecha-card flecha-izquierda" onclick="event.stopPropagation(); navegarImagenCard(${producto.id}, -1)">❮</button>` : ''}
+                <img src="${imagenPrincipal}" alt="${producto.nombre}" class="imagen-principal" loading="lazy">
+                ${tieneMultiplesImagenes ? `<button class="flecha-card flecha-derecha" onclick="event.stopPropagation(); navegarImagenCard(${producto.id}, 1)">❯</button>` : ''}
+                ${tieneMultiplesImagenes ? `<div class="indicador-imagenes">◉ ${' •'.repeat(producto.imagenes.length - 1)}</div>` : ''}
+            </div>
+            <div class="producto-detalles">
+                <h3>${producto.nombre}</h3>
+                <p class="producto-precio">$${formatearPrecio(producto.precio)}</p>
+                <button class="btn-agregar" onclick="event.stopPropagation(); agregarAlCarrito(${producto.id})">
+                    Agregar al carrito
+                </button>
+            </div>
+        `;
+
+        contenedorProductos.appendChild(productoElement);
+    });
 }
 
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    cargarProductos();
-    
-    // Agregar eventos a los enlaces de categorías
-    document.querySelectorAll('nav ul li a').forEach(enlace => {
+// Función para inicializar los eventos de las categorías
+function inicializarEventosCategorias() {
+    const enlaces = document.querySelectorAll('nav ul li a');
+    enlaces.forEach(enlace => {
         enlace.addEventListener('click', (e) => {
             e.preventDefault();
-            const categoria = e.target.textContent;
+            
+            // Remover clase activa de todos los enlaces
+            enlaces.forEach(el => el.classList.remove('activo'));
+            // Agregar clase activa al enlace clickeado
+            e.target.classList.add('activo');
+            
+            const categoria = e.target.textContent.trim();
             filtrarPorCategoria(categoria);
         });
     });
 
+    // Cargar todos los productos inicialmente
+    filtrarPorCategoria('TODOS');
+}
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarEventosCategorias();
+    
     // Cerrar modal al hacer clic fuera
     window.addEventListener('click', (e) => {
         const modal = document.querySelector('.modal-producto');
