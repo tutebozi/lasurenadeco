@@ -16,22 +16,36 @@ function cargarProductos() {
 
     // Mostrar productos
     productos.forEach(producto => {
+        const tieneMultiplesImagenes = producto.imagenes && producto.imagenes.length > 1;
         const imagenUrl = producto.imagenes && producto.imagenes.length > 0 
             ? producto.imagenes[0] 
             : 'img/placeholder.jpg';
 
         const productoElement = document.createElement('div');
         productoElement.className = 'producto-card';
+        productoElement.setAttribute('data-id', producto.id);
+        productoElement.setAttribute('data-imagen-index', '0'); // Inicializar índice de imagen
+        
+        // Crear el indicador de puntos para imágenes múltiples
+        let indicadorPuntos = '';
+        if (tieneMultiplesImagenes && producto.imagenes) {
+            indicadorPuntos = '◉' + ' •'.repeat(producto.imagenes.length - 1);
+        }
+        
         productoElement.innerHTML = `
             <div class="producto-imagen" onclick="mostrarDetalleProducto(${producto.id})">
+                ${tieneMultiplesImagenes ? `<button class="flecha-card flecha-izquierda" onclick="event.stopPropagation(); navegarImagenCard(${producto.id}, -1)">❮</button>` : ''}
                 <img src="${imagenUrl}" alt="${producto.nombre}" loading="lazy" class="imagen-principal">
+                ${tieneMultiplesImagenes ? `<button class="flecha-card flecha-derecha" onclick="event.stopPropagation(); navegarImagenCard(${producto.id}, 1)">❯</button>` : ''}
+                ${tieneMultiplesImagenes ? `<div class="indicador-imagenes">${indicadorPuntos}</div>` : ''}
             </div>
-            <h3 class="producto-titulo">${producto.nombre}</h3>
-            <p class="producto-precio">$${formatearPrecio(producto.precio)}</p>
-            <p class="producto-categoria">${producto.categoria}</p>
-            <button class="btn-agregar" onclick="agregarAlCarrito(${producto.id})">
-                Agregar al carrito
-            </button>
+            <div class="producto-detalles">
+                <h3 class="producto-titulo">${producto.nombre}</h3>
+                <p class="producto-precio">$${formatearPrecio(producto.precio)}</p>
+                <button class="btn-agregar" onclick="agregarAlCarrito(${producto.id})">
+                    Agregar al carrito
+                </button>
+            </div>
         `;
 
         productosContainer.appendChild(productoElement);
@@ -50,15 +64,19 @@ function mostrarDetalleProducto(productoId) {
     const modalProducto = document.getElementById('modal-producto');
     const modalContenido = modalProducto.querySelector('.modal-contenido');
     
+    const tieneMultiplesImagenes = producto.imagenes && producto.imagenes.length > 1;
+    
     modalContenido.innerHTML = `
         <div class="producto-imagenes-carousel">
             <div class="imagen-principal-container">
-                <button class="flecha-navegacion flecha-izquierda" onclick="navegarImagen(-1)">❮</button>
-                <img src="${producto.imagenes[0]}" alt="${producto.nombre}" loading="lazy">
-                <button class="flecha-navegacion flecha-derecha" onclick="navegarImagen(1)">❯</button>
+                ${tieneMultiplesImagenes ? `<button class="flecha-navegacion flecha-izquierda" onclick="navegarImagen(-1)">❮</button>` : ''}
+                <img src="${producto.imagenes && producto.imagenes.length > 0 ? producto.imagenes[0] : 'img/placeholder.jpg'}" 
+                    alt="${producto.nombre}" loading="lazy">
+                ${tieneMultiplesImagenes ? `<button class="flecha-navegacion flecha-derecha" onclick="navegarImagen(1)">❯</button>` : ''}
             </div>
+            ${tieneMultiplesImagenes ? `
             <div class="imagenes-miniaturas">
-                ${producto.imagenes.map((imagen, index) => `
+                ${producto.imagenes && producto.imagenes.map((imagen, index) => `
                     <img src="${imagen}" 
                          alt="${producto.nombre} - Imagen ${index + 1}" 
                          class="${index === 0 ? 'activa' : ''}"
@@ -66,14 +84,15 @@ function mostrarDetalleProducto(productoId) {
                          onclick="cambiarImagenPrincipal(this.src, ${index})">
                 `).join('')}
             </div>
+            ` : ''}
         </div>
         <div class="producto-info">
             <span class="cerrar" onclick="cerrarModalProducto()">&times;</span>
             <h2>${producto.nombre}</h2>
             <p class="precio">$${formatearPrecio(producto.precio)}</p>
-            <p class="descripcion">${producto.descripcion}</p>
-            <p class="categoria">Categoría: ${producto.categoria}</p>
-            <p class="stock">Stock: ${producto.stock} unidades</p>
+            <p class="descripcion">${producto.descripcion || ''}</p>
+            <p class="categoria">Categoría: ${producto.categoria || ''}</p>
+            <p class="stock">Stock: ${producto.stock || 0} unidades</p>
             <button onclick="agregarAlCarrito(${producto.id})">
                 Agregar al carrito
             </button>
@@ -163,4 +182,39 @@ window.formatearPrecio = formatearPrecio;
 window.mostrarDetalleProducto = mostrarDetalleProducto;
 window.cambiarImagenPrincipal = cambiarImagenPrincipal;
 window.navegarImagen = navegarImagen;
-window.cerrarModalProducto = cerrarModalProducto; 
+window.navegarImagenCard = navegarImagenCard;
+window.cerrarModalProducto = cerrarModalProducto;
+
+// Función para navegar entre imágenes en las cards
+function navegarImagenCard(productoId, direccion) {
+    // Detener la propagación para evitar abrir el modal
+    event.stopPropagation();
+    
+    const producto = productos.find(p => p.id === productoId);
+    if (!producto || !producto.imagenes || producto.imagenes.length <= 1) return;
+    
+    const productoCard = document.querySelector(`.producto-card[data-id="${productoId}"]`);
+    if (!productoCard) return;
+    
+    const imagenPrincipal = productoCard.querySelector('.imagen-principal');
+    
+    // Obtener el índice actual desde el atributo data
+    let indiceActual = parseInt(productoCard.getAttribute('data-imagen-index') || '0');
+    
+    // Calcular el nuevo índice
+    const nuevoIndice = (indiceActual + direccion + producto.imagenes.length) % producto.imagenes.length;
+    
+    // Cambiar la imagen
+    imagenPrincipal.src = producto.imagenes[nuevoIndice];
+    
+    // Actualizar el índice en el atributo data
+    productoCard.setAttribute('data-imagen-index', nuevoIndice.toString());
+    
+    // Actualizar el indicador visual
+    const indicador = productoCard.querySelector('.indicador-imagenes');
+    if (indicador && producto.imagenes) {
+        const puntos = Array(producto.imagenes.length).fill('•');
+        puntos[nuevoIndice] = '◉';
+        indicador.textContent = puntos.join(' ');
+    }
+} 

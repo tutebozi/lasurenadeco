@@ -137,6 +137,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow: hidden;
 }
 
 .producto-imagen img.imagen-principal {
@@ -147,16 +148,24 @@ main {
     margin-bottom: 0.5rem;
 }
 
+.producto-detalles {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
 .producto-card h3 {
     font-size: 1.2rem;
     margin: 0.5rem 0;
+    order: 1;
 }
 
-.producto-card .precio {
+.producto-card .producto-precio {
     font-size: 1.5rem;
     color: #2c3e50;
     font-weight: bold;
     margin: 0.5rem 0;
+    order: 2;
 }
 
 .producto-card .descripcion {
@@ -165,7 +174,7 @@ main {
     margin: 0.5rem 0;
 }
 
-.producto-card button {
+.producto-card .btn-agregar {
     background-color: #2c3e50;
     color: white;
     border: none;
@@ -173,10 +182,11 @@ main {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: auto;
+    margin-top: 0.5rem;
+    order: 3;
 }
 
-.producto-card button:hover {
+.producto-card .btn-agregar:hover {
     background-color: #34495e;
 }
 
@@ -1761,4 +1771,83 @@ footer {
     color: #333;
     cursor: pointer;
     z-index: 10;
+}
+
+/* Estilos para las flechas de navegación en las cards */
+.flecha-card {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.7);
+    color: #333;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s, background 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.flecha-izquierda {
+    left: 10px;
+}
+
+.flecha-derecha {
+    right: 10px;
+}
+
+.producto-imagen:hover .flecha-card {
+    opacity: 0.8;
+}
+
+.flecha-card:hover {
+    background: rgba(255, 255, 255, 0.9);
+    opacity: 1;
+}
+
+/* Indicador de múltiples imágenes */
+.indicador-imagenes {
+    display: none; /* Ocultar completamente los indicadores de puntos */
+}
+
+/* Estilos para las flechas de navegación en el modal */
+.flecha-navegacion {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.7);
+    color: #333;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    font-size: 16px;
+    opacity: 0.7;
+    transition: opacity 0.3s, background 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.flecha-navegacion:hover {
+    background: rgba(255, 255, 255, 0.9);
+    opacity: 1;
+}
+
+.flecha-izquierda {
+    left: 10px;
+}
+
+.flecha-derecha {
+    right: 10px;
 } 

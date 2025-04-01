@@ -298,6 +298,8 @@ function mostrarHistorialCompras() {
 // Variables globales
 let productos = [];
 let productoActual = null;
+let loadingImageBase64 = 'data:image/gif;base64,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';
+let errorImageBase64 = 'data:image/png;base64,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';
 
 // Función para inicializar la página
 function inicializarPagina() {
@@ -450,43 +452,145 @@ async function guardarProducto(event) {
     const form = event.target;
     let imagenes = [];
     
-    // Procesar todas las imágenes
-    for (let i = 0; i < 5; i++) {
-        const input = form.querySelector(`input[type="file"][data-index="${i}"]`);
-        const preview = document.getElementById(`preview-${i + 1}`);
-        
-        if (input.files && input.files[0]) {
-            // Si hay una nueva imagen seleccionada
-            const imagenBase64 = await procesarImagen(input.files[0]);
-            imagenes.push(imagenBase64);
-        } else if (productoActual && productoActual.imagenes && productoActual.imagenes[i]) {
-            // Mantener la imagen existente si no se seleccionó una nueva
-            imagenes.push(productoActual.imagenes[i]);
+    try {
+        // Limitar a máximo 5 imágenes y procesarlas con compresión
+        for (let i = 0; i < 5; i++) {
+            const input = form.querySelector(`input[type="file"][data-index="${i}"]`);
+            
+            if (input.files && input.files[0]) {
+                // Comprimir la imagen antes de guardarla
+                try {
+                    const imagenComprimida = await comprimirImagen(input.files[0]);
+                    if (imagenComprimida) {
+                        imagenes.push(imagenComprimida);
+                        console.log(`Imagen ${i+1} comprimida correctamente`);
+                    }
+                } catch (error) {
+                    console.error(`Error al comprimir la imagen ${i+1}:`, error);
+                }
+            } else if (productoActual && productoActual.imagenes && productoActual.imagenes[i]) {
+                // Mantener la imagen existente si no se seleccionó una nueva
+                imagenes.push(productoActual.imagenes[i]);
+            }
+            
+            // Si ya tenemos 5 imágenes, salir del bucle
+            if (imagenes.length >= 5) {
+                break;
+            }
         }
+        
+        const producto = {
+            id: productoActual ? productoActual.id : Date.now(),
+            nombre: form.nombre.value,
+            precio: parseFloat(form.precio.value),
+            descripcion: form.descripcion.value,
+            categoria: form.categoria.value,
+            stock: parseInt(form.stock.value),
+            imagenes: imagenes
+        };
+        
+        try {
+            if (productoActual) {
+                // Actualizar producto existente
+                const index = productos.findIndex(p => p.id === productoActual.id);
+                productos[index] = producto;
+            } else {
+                // Agregar nuevo producto
+                productos.push(producto);
+            }
+            
+            // Guardar en localStorage con manejo de errores
+            localStorage.setItem('productos', JSON.stringify(productos));
+            cerrarModal();
+            cargarProductos();
+            
+            // Mostrar mensaje de éxito
+            alert('Producto guardado correctamente');
+        } catch (error) {
+            console.error('Error al guardar el producto:', error);
+            alert('Error al guardar el producto. El almacenamiento puede estar lleno.');
+            
+            // Intentar guardar sin imágenes como respaldo
+            try {
+                producto.imagenes = producto.imagenes.length > 0 ? [producto.imagenes[0]] : [];
+                
+                if (productoActual) {
+                    const index = productos.findIndex(p => p.id === productoActual.id);
+                    productos[index] = producto;
+                } else {
+                    productos.push(producto);
+                }
+                
+                localStorage.setItem('productos', JSON.stringify(productos));
+                cerrarModal();
+                cargarProductos();
+                
+                alert('Producto guardado con imagen reducida debido a limitaciones de almacenamiento');
+            } catch (fallbackError) {
+                console.error('Error al guardar con imagen reducida:', fallbackError);
+                alert('No se pudo guardar el producto ni siquiera con imagen reducida');
+            }
+        }
+    } catch (error) {
+        console.error('Error general al procesar el producto:', error);
+        alert('Error al procesar el producto. Por favor, intente nuevamente.');
     }
-    
-    const producto = {
-        id: productoActual ? productoActual.id : Date.now(),
-        nombre: form.nombre.value,
-        precio: parseFloat(form.precio.value),
-        descripcion: form.descripcion.value,
-        categoria: form.categoria.value,
-        stock: parseInt(form.stock.value),
-        imagenes: imagenes
-    };
-    
-    if (productoActual) {
-        // Actualizar producto existente
-        const index = productos.findIndex(p => p.id === productoActual.id);
-        productos[index] = producto;
-    } else {
-        // Agregar nuevo producto
-        productos.push(producto);
-    }
-    
-    localStorage.setItem('productos', JSON.stringify(productos));
-    cerrarModal();
-    cargarProductos();
+}
+
+// Función para comprimir imagen
+async function comprimirImagen(file) {
+    return new Promise((resolve, reject) => {
+        try {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Calcular dimensiones manteniendo proporción
+                        let width = img.width;
+                        let height = img.height;
+                        const maxSize = 800; // Reducir tamaño máximo para ahorrar espacio
+                        
+                        if (width > height && width > maxSize) {
+                            height = (height * maxSize) / width;
+                            width = maxSize;
+                        } else if (height > maxSize) {
+                            width = (width * maxSize) / height;
+                            height = maxSize;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        // Dibujar y comprimir
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7); // Mayor compresión (0.7 en lugar de 0.8)
+                        
+                        resolve(dataUrl);
+                    } catch (error) {
+                        console.error('Error al procesar la imagen en canvas:', error);
+                        reject(error);
+                    }
+                };
+                img.onerror = function() {
+                    console.error('Error al cargar la imagen');
+                    reject(new Error('Error al cargar la imagen'));
+                };
+                img.src = e.target.result;
+            };
+            reader.onerror = function(error) {
+                console.error('Error al leer el archivo:', error);
+                reject(error);
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('Error en comprimirImagen:', error);
+            reject(error);
+        }
+    });
 }
 
 // Función para eliminar producto
@@ -525,26 +629,34 @@ function formatearPrecio(precio) {
     return new Intl.NumberFormat('es-CL').format(precio || 0);
 }
 
-// Función para procesar imagen
-async function procesarImagen(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
 // Función para previsualizar imagen
-function previewImagen(input, previewId) {
+async function previewImagen(input, previewId) {
     const preview = document.getElementById(previewId);
     if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
+        // Mostrar indicador de carga
+        preview.src = loadingImageBase64;
+        preview.style.display = 'block';
+        
+        try {
+            // Comprimir la imagen para la vista previa
+            const imagenComprimida = await comprimirImagen(input.files[0]);
+            preview.src = imagenComprimida;
             preview.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
+        } catch (error) {
+            console.error('Error al comprimir la imagen para vista previa:', error);
+            
+            // Si falla la compresión, mostrar la imagen original
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.onerror = function() {
+                preview.src = errorImageBase64;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 }
 
@@ -662,47 +774,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-
-// Hacer las funciones disponibles globalmente
-window.mostrarFormularioProducto = mostrarFormularioProducto;
-window.guardarProducto = guardarProducto;
-window.eliminarProducto = eliminarProducto;
-window.cerrarModal = cerrarModal;
-window.previewImagen = previewImagen;
-window.previewImagenesAdicionales = previewImagenesAdicionales;
-
-// Agregar estilos
-const styles = document.createElement('style');
-styles.textContent = `
-    .panel {
-        padding: 20px;
-        background: white;
-        margin: 20px;
-        border-radius: 8px;
-    }
-    .form-group {
-        margin: 20px 0;
-    }
-    .form-group input {
-        width: 300px;
-        padding: 5px;
-        margin-right: 10px;
-    }
-    .anuncio {
-        margin: 10px 0;
-        display: flex;
-        gap: 10px;
-    }
-    .anuncio input {
-        width: 300px;
-        padding: 5px;
-    }
-    button {
-        padding: 5px 10px;
-        cursor: pointer;
-    }
-`;
-document.head.appendChild(styles); 
 
 // Funciones para el texto en movimiento
 document.addEventListener('DOMContentLoaded', function() {
@@ -856,62 +927,6 @@ async function guardarHero() {
     }
 }
 
-// Función para comprimir imagen
-async function comprimirImagen(file) {
-    return new Promise((resolve, reject) => {
-        try {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    try {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Calcular dimensiones manteniendo proporción
-                        let width = img.width;
-                        let height = img.height;
-                        const maxSize = 1200;
-                        
-                        if (width > height && width > maxSize) {
-                            height = (height * maxSize) / width;
-                            width = maxSize;
-                        } else if (height > maxSize) {
-                            width = (width * maxSize) / height;
-                            height = maxSize;
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        
-                        // Dibujar y comprimir
-                        ctx.drawImage(img, 0, 0, width, height);
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                        
-                        resolve(dataUrl);
-                    } catch (error) {
-                        console.error('Error al procesar la imagen en canvas:', error);
-                        reject(error);
-                    }
-                };
-                img.onerror = function() {
-                    console.error('Error al cargar la imagen');
-                    reject(new Error('Error al cargar la imagen'));
-                };
-                img.src = e.target.result;
-            };
-            reader.onerror = function(error) {
-                console.error('Error al leer el archivo:', error);
-                reject(error);
-            };
-            reader.readAsDataURL(file);
-        } catch (error) {
-            console.error('Error en comprimirImagen:', error);
-            reject(error);
-        }
-    });
-}
-
 // Función para cargar el hero al iniciar
 function cargarHero() {
     // Obtener datos del hero desde localStorage
@@ -968,4 +983,45 @@ function cargarHero() {
     }
     
     console.log('Hero cargado con éxito');
-} 
+}
+
+// Hacer las funciones disponibles globalmente
+window.mostrarFormularioProducto = mostrarFormularioProducto;
+window.guardarProducto = guardarProducto;
+window.eliminarProducto = eliminarProducto;
+window.cerrarModal = cerrarModal;
+window.previewImagen = previewImagen;
+window.previewImagenesAdicionales = previewImagenesAdicionales;
+
+// Agregar estilos
+const styles = document.createElement('style');
+styles.textContent = `
+    .panel {
+        padding: 20px;
+        background: white;
+        margin: 20px;
+        border-radius: 8px;
+    }
+    .form-group {
+        margin: 20px 0;
+    }
+    .form-group input {
+        width: 300px;
+        padding: 5px;
+        margin-right: 10px;
+    }
+    .anuncio {
+        margin: 10px 0;
+        display: flex;
+        gap: 10px;
+    }
+    .anuncio input {
+        width: 300px;
+        padding: 5px;
+    }
+    button {
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+`;
+document.head.appendChild(styles); 
