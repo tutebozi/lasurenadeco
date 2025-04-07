@@ -122,7 +122,7 @@ function agregarAlCarrito(productoId) {
         
         if (itemExistente) {
             itemExistente.cantidad++;
-        } else {
+    } else {
             // Obtener la imagen de forma segura
             let imagen = '';
             if (producto.imagenes && Array.isArray(producto.imagenes) && producto.imagenes.length > 0) {
@@ -175,23 +175,37 @@ function mostrarMensaje(mensaje, tipo = 'success') {
 
 // Función para actualizar la cantidad de un producto
 function actualizarCantidad(id, cambio) {
-    const item = carrito.find(item => item.id === id);
-    if (item) {
-        item.cantidad += cambio;
-        if (item.cantidad <= 0) {
-            carrito = carrito.filter(item => item.id !== id);
+    try {
+        // Convertir id a número si es necesario
+        const itemId = typeof id === 'string' ? parseInt(id) : id;
+        const item = carrito.find(item => item.id === itemId);
+        
+        if (item) {
+            item.cantidad += cambio;
+            if (item.cantidad <= 0) {
+                eliminarDelCarrito(itemId);
+            } else {
+                guardarCarrito();
+                actualizarCarrito();
+            }
         }
-        guardarCarrito();
-        actualizarCarrito();
+    } catch (error) {
+        console.error('Error al actualizar cantidad:', error);
     }
 }
 
 // Función para eliminar un producto del carrito
 function eliminarDelCarrito(id) {
-    carrito = carrito.filter(item => item.id !== id);
-    guardarCarrito();
-    actualizarCarrito();
-    mostrarMensaje('Producto eliminado del carrito', 'info');
+    try {
+        // Convertir id a número si es necesario
+        const itemId = typeof id === 'string' ? parseInt(id) : id;
+        carrito = carrito.filter(item => item.id !== itemId);
+        guardarCarrito();
+        actualizarCarrito();
+        mostrarMensaje('Producto eliminado del carrito', 'info');
+    } catch (error) {
+        console.error('Error al eliminar del carrito:', error);
+    }
 }
 
 // Función para vaciar el carrito
@@ -211,13 +225,8 @@ function finalizarCompra() {
         return;
     }
     
-    // Aquí iría la lógica para procesar el pago
-    alert('¡Gracias por tu compra! Pronto implementaremos el proceso de pago.');
-    carrito = [];
-    guardarCarrito();
-    actualizarCarrito();
     cerrarCarrito();
-    mostrarMensaje('¡Compra finalizada con éxito!', 'success');
+    iniciarCheckout();
 }
 
 // Función para actualizar el contador del carrito
@@ -232,46 +241,105 @@ function actualizarContadorCarrito() {
 
 // Función para actualizar la visualización del carrito
 function actualizarCarrito() {
-    const contenedor = document.getElementById('carrito-items');
-    const totalElement = document.getElementById('carrito-total');
-    
-    if (!contenedor || !totalElement) {
-        console.error('Elementos del carrito no encontrados');
-        return;
-    }
-    
-    if (carrito.length === 0) {
-        contenedor.innerHTML = '<p class="carrito-vacio">Tu carrito está vacío</p>';
-        totalElement.textContent = '$0';
-        return;
-    }
-    
-    contenedor.innerHTML = carrito.map(item => {
-        // Validar y optimizar la imagen
-        const imagenUrl = optimizarImagen(item.imagen);
+    try {
+        const contenedor = document.getElementById('carrito-items');
+        const totalElement = document.getElementById('carrito-total');
+        const btnComprar = document.querySelector('.btn-comprar');
         
-        return `
-            <div class="carrito-item">
-                <img src="${imagenUrl}" 
-                     alt="${item.nombre}" 
-                     class="carrito-item-imagen"
-                     onerror="this.src='https://dummyimage.com/300x300/cccccc/ffffff&text=${encodeURIComponent(item.nombre)}'; this.onerror=null;">
-                <div class="carrito-item-info">
-                    <h3 class="carrito-item-nombre">${item.nombre}</h3>
-                    <p class="carrito-item-precio">$${formatearPrecio(item.precio)}</p>
-                    <div class="carrito-item-cantidad">
-                        <button class="btn-cantidad" onclick="actualizarCantidad('${item.id}', -1)">-</button>
-                        <span>${item.cantidad}</span>
-                        <button class="btn-cantidad" onclick="actualizarCantidad('${item.id}', 1)">+</button>
-                    </div>
-                </div>
-                <i class="fas fa-trash carrito-item-eliminar" onclick="eliminarDelCarrito('${item.id}')"></i>
-            </div>
-        `;
-    }).join('');
-    
-    const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-    totalElement.textContent = `$${formatearPrecio(total)}`;
+        if (!contenedor || !totalElement) {
+            console.error('Elementos del carrito no encontrados');
+            return;
+        }
+        
+        if (carrito.length === 0) {
+            contenedor.innerHTML = '<p class="carrito-vacio">Tu carrito está vacío</p>';
+            totalElement.textContent = '$0';
+            if (btnComprar) btnComprar.disabled = true;
+            return;
+        }
+        
+        if (btnComprar) btnComprar.disabled = false;
+        
+        // Generar el HTML de los items
+        contenedor.innerHTML = '';
+        carrito.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'carrito-item';
+            itemElement.dataset.id = item.id;
+            
+            // Imagen con manejo de errores
+            const imagen = document.createElement('img');
+            imagen.src = item.imagen;
+            imagen.alt = item.nombre;
+            imagen.className = 'carrito-item-imagen';
+            imagen.onerror = function() {
+                this.onerror = null;
+                this.src = 'https://dummyimage.com/300x300/cccccc/ffffff&text=' + encodeURIComponent(item.nombre);
+            };
+            
+            // Información del producto
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'carrito-item-info';
+            
+            const nombre = document.createElement('h3');
+            nombre.className = 'carrito-item-nombre';
+            nombre.textContent = item.nombre;
+            
+            const precio = document.createElement('p');
+            precio.className = 'carrito-item-precio';
+            precio.textContent = `$${formatearPrecio(item.precio)}`;
+            
+            // Controles de cantidad
+            const cantidadDiv = document.createElement('div');
+            cantidadDiv.className = 'carrito-item-cantidad';
+            
+            const btnMenos = document.createElement('button');
+            btnMenos.className = 'btn-cantidad';
+            btnMenos.textContent = '-';
+            btnMenos.onclick = function() {
+                actualizarCantidad(item.id, -1);
+            };
+            
+            const cantidadSpan = document.createElement('span');
+            cantidadSpan.textContent = item.cantidad;
+            
+            const btnMas = document.createElement('button');
+            btnMas.className = 'btn-cantidad';
+            btnMas.textContent = '+';
+            btnMas.onclick = function() {
+                actualizarCantidad(item.id, 1);
+            };
+            
+            cantidadDiv.appendChild(btnMenos);
+            cantidadDiv.appendChild(cantidadSpan);
+            cantidadDiv.appendChild(btnMas);
+            
+            infoDiv.appendChild(nombre);
+            infoDiv.appendChild(precio);
+            infoDiv.appendChild(cantidadDiv);
+            
+            // Botón de eliminar
+            const btnEliminar = document.createElement('button');
+            btnEliminar.className = 'carrito-item-eliminar';
+            btnEliminar.innerHTML = '<i class="fas fa-trash"></i>';
+            btnEliminar.onclick = function() {
+                eliminarDelCarrito(item.id);
+            };
+            
+            // Ensamblar el item completo
+            itemElement.appendChild(imagen);
+            itemElement.appendChild(infoDiv);
+            itemElement.appendChild(btnEliminar);
+            
+            contenedor.appendChild(itemElement);
+        });
+        
+        // Actualizar el total
+        const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+        totalElement.textContent = `$${formatearPrecio(total)}`;
+    } catch (error) {
+        console.error('Error al actualizar carrito:', error);
+    }
 }
 
 // Función para formatear precios

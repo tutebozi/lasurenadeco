@@ -15,14 +15,20 @@
             <h1>Panel Admin</h1>
             <nav>
                 <ul>
-                    <li><a href="#productos" data-section="productos">
+                    <li><a href="#" id="menuProductos" class="nav-link" data-section="productos">
                         <i class="fas fa-box"></i> Productos
                     </a></li>
-                    <li><a href="#hero" data-section="hero">
+                    <li><a href="#" id="menuCategorias" class="nav-link" data-section="categorias">
+                        <i class="fas fa-tags"></i> Categorías
+                    </a></li>
+                    <li><a href="#" id="menuHero" class="nav-link" data-section="hero">
                         <i class="fas fa-images"></i> Hero
                     </a></li>
-                    <li><a href="#texto-movimiento" data-section="texto-movimiento">
+                    <li><a href="#" id="menuTextoMovimiento" class="nav-link" data-section="texto-movimiento">
                         <i class="fas fa-scroll"></i> Texto Movimiento
+                    </a></li>
+                    <li><a href="#" id="menuPagos" class="nav-link" data-section="pagos">
+                        <i class="fas fa-credit-card"></i> Configuración de Pagos
                     </a></li>
                 </ul>
             </nav>
@@ -118,5 +124,31 @@
 
     <script src="utils.js"></script>
     <script src="admin.js"></script>
+    <script>
+        // Inicializar el panel de administración
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar eventos de navegación
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remover clase activa de todos los enlaces
+                    document.querySelectorAll('.nav-link').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    
+                    // Añadir clase activa al enlace clickeado
+                    this.classList.add('active');
+                    
+                    // Cargar la sección correspondiente
+                    const seccion = this.getAttribute('data-section');
+                    cambiarSeccion(seccion);
+                });
+            });
+            
+            // Cargar sección inicial (productos por defecto)
+            document.getElementById('menuProductos').click();
+        });
+    </script>
 </body>
 </html> 

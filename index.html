@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="carrito.css">
     <link rel="stylesheet" href="login.css">
     <link rel="stylesheet" href="productos.css">
+    <link rel="stylesheet" href="checkout.css">
 </head>
 <body>
     <!-- Agregar el modal de producto al inicio del body -->
@@ -70,16 +71,20 @@
         <div class="modal-carrito-contenido">
             <span class="cerrar-carrito" onclick="cerrarCarrito()">&times;</span>
             <h2>Tu Carrito</h2>
-            <div id="carrito-items" class="carrito-items">
-                <!-- Los items se cargarán dinámicamente -->
+            <div class="carrito-contenido">
+                <div id="carrito-items" class="carrito-items">
+                    <!-- Los items se cargarán dinámicamente -->
+                </div>
             </div>
-            <div class="carrito-total">
-                <span>Total:</span>
-                <span id="carrito-total">$0</span>
-            </div>
-            <div class="carrito-botones">
-                <button onclick="vaciarCarrito()" class="btn-vaciar">Vaciar Carrito</button>
-                <button onclick="finalizarCompra()" class="btn-comprar">Finalizar Compra</button>
+            <div class="carrito-footer">
+                <div class="carrito-total">
+                    <span>Total:</span>
+                    <span id="carrito-total">$0</span>
+                </div>
+                <div class="carrito-botones">
+                    <button onclick="vaciarCarrito()" class="btn-vaciar">Vaciar Carrito</button>
+                    <button onclick="finalizarCompra()" class="btn-comprar">Finalizar Compra</button>
+                </div>
             </div>
         </div>
     </div>
@@ -145,6 +150,7 @@
     <script src="carrito.js"></script>
     <script src="login.js"></script>
     <script src="productos.js"></script>
+    <script src="checkout.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             cargarHero();

@@ -1,0 +1,477 @@
+/* Estilos para el checkout */
+.modal-checkout {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 3000;
+    overflow-y: auto;
+}
+
+.modal-checkout.mostrar {
+    display: block;
+}
+
+.modal-checkout-contenido {
+    background-color: white;
+    width: 90%;
+    max-width: 1000px;
+    margin: 3% auto;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mensajes de confirmación y error */
+.mensaje {
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.mensaje.success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.mensaje.error {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+/* Animación de procesamiento de pago */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Mejoras visuales para el paso de confirmación */
+.confirmacion {
+    padding: 3rem 1rem;
+}
+
+.icono-confirmacion i {
+    font-size: 5rem;
+    color: #28a745;
+    margin-bottom: 1.5rem;
+}
+
+.detalles-pedido {
+    display: inline-block;
+    background-color: #f8f9fa;
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    text-align: left;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Estilos para la sección de transferencia bancaria */
+.datos-transferencia {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.dato-transferencia {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.dato-transferencia:last-child {
+    border-bottom: none;
+}
+
+.instrucciones-transferencia {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    border-left: 4px solid #8b7355;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Responsive para pantallas más pequeñas */
+@media (max-width: 768px) {
+    .modal-checkout-contenido {
+        width: 95%;
+        margin: 5% auto;
+    }
+    
+    .detalles-pedido {
+        width: 90%;
+        padding: 1rem;
+    }
+    
+    .campo {
+        margin-bottom: 1rem;
+    }
+    
+    .checkout-paso h2 {
+        font-size: 1.4rem;
+    }
+}
+
+/* Estilos para el modal de checkout */
+.modal-checkout {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.checkout-contenido {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Pasos del checkout */
+.checkout-pasos {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.paso {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+}
+
+.paso.activo {
+    color: var(--accent-color);
+}
+
+.paso .numero {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.paso.activo .numero {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* Formulario de checkout */
+.checkout-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.campo-formulario {
+    margin-bottom: 1rem;
+}
+
+.campo-formulario label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.campo-formulario input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.campo-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+/* Opciones de entrega */
+.opciones-entrega {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.opcion-entrega {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.opcion-entrega:hover {
+    border-color: var(--accent-color);
+}
+
+.opcion-entrega label {
+    flex-grow: 1;
+    cursor: pointer;
+}
+
+.opcion-entrega .titulo {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.opcion-entrega .detalle {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.opcion-entrega .precio {
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+/* Resumen de compra */
+.resumen-compra {
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+}
+
+.items-resumen {
+    margin: 1rem 0;
+}
+
+.item-resumen {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.item-resumen img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.item-detalles {
+    flex-grow: 1;
+}
+
+.item-detalles h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.item-detalles .cantidad {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.total-resumen {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid #eee;
+}
+
+/* Botones */
+.btn-continuar {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-continuar:hover {
+    background-color: var(--light-accent);
+}
+
+/* Formulario de pago */
+.formulario-pago {
+    padding: 1rem 0;
+}
+
+.campos-tarjeta {
+    margin-top: 1rem;
+}
+
+.campos-tarjeta-flex {
+    display: flex;
+    gap: 1rem;
+}
+
+.campos-tarjeta-flex .campo-formulario {
+    flex: 1;
+}
+
+/* Procesando pago */
+.procesando-pago {
+    text-align: center;
+    padding: 2rem;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Confirmación de compra */
+.confirmacion-compra {
+    text-align: center;
+    padding: 2rem;
+}
+
+.icono-exito {
+    width: 80px;
+    height: 80px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    margin: 0 auto 1.5rem;
+}
+
+.detalles-confirmacion {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.btn-volver {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s;
+}
+
+.btn-volver:hover {
+    background-color: var(--light-accent);
+}
+
+/* Estilos para Mercado Pago */
+.metodo-pago {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+}
+
+.metodo-pago:hover {
+    border-color: var(--accent-color);
+}
+
+.metodo-pago label {
+    display: flex;
+    align-items: center;
+    margin-left: 0.5rem;
+    cursor: pointer;
+}
+
+.label-mercadopago {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.logo-mercadopago {
+    height: 30px;
+    margin-left: 10px;
+}
+
+.info-mercadopago {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    color: #505050;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .checkout-contenido {
+        padding: 1rem;
+        width: 95%;
+    }
+
+    .campos-tarjeta-flex {
+        flex-direction: column;
+    }
+
+    .opcion-entrega {
+        flex-direction: column;
+    }
+
+    .opcion-entrega .precio {
+        align-self: flex-end;
+    }
+} 

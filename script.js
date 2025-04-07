@@ -39,7 +39,7 @@ function cargarProductos(seccion) {
             productosContainer.innerHTML = '<div class="no-productos"><p>No hay productos disponibles en esta categoría.</p></div>';
             return;
         }
-
+        
         productos.forEach(producto => {
             const card = document.createElement('div');
             card.className = 'producto-card';
@@ -56,14 +56,14 @@ function cargarProductos(seccion) {
             }
 
             card.innerHTML = `
-                <div class="producto-imagen">
+                    <div class="producto-imagen">
                     <img src="${imagenes[0]}" alt="${producto.nombre}" class="imagen-principal" 
                          onerror="this.onerror=null; this.src='${carouselState.defaultImage}';">
-                    ${imagenes.length > 1 ? `
+                        ${imagenes.length > 1 ? `
                         <button class="flecha-card flecha-izquierda" onclick="cambiarImagenProducto(this.parentElement, '${producto.id}', 'prev')">&lt;</button>
                         <button class="flecha-card flecha-derecha" onclick="cambiarImagenProducto(this.parentElement, '${producto.id}', 'next')">&gt;</button>
-                    ` : ''}
-                </div>
+                        ` : ''}
+                    </div>
                 <div class="producto-detalles">
                     <h3>${producto.nombre}</h3>
                     <p class="producto-precio">$${producto.precio}</p>
@@ -74,7 +74,7 @@ function cargarProductos(seccion) {
 
             productosContainer.appendChild(card);
         });
-
+        
     } catch (error) {
         console.error('Error al cargar productos:', error);
         const productosContainer = document.querySelector('.productos-container');
@@ -113,7 +113,7 @@ function mostrarDetallesProducto(producto) {
                                             onclick="cambiarImagenPrincipal(this, ${index})"
                                         >
                                     `).join('')}
-                                </div>
+                </div>
                             ` : ''}
                         </div>
                         <div class="producto-info">
@@ -129,12 +129,12 @@ function mostrarDetallesProducto(producto) {
                                 })">
                                     Agregar al Carrito
                                 </button>
-                            </div>
-                        </div>
                     </div>
+                        </div>
                 </div>
             </div>
-        `;
+        </div>
+    `;
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         

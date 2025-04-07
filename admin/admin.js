@@ -310,20 +310,209 @@ function inicializarPagina() {
 
 // Función para mostrar la sección de productos
 function mostrarSeccionProductos() {
+    console.log('Mostrando sección de productos');
     const mainContent = document.getElementById('main-content');
-    if (!mainContent) return;
-
+    
     mainContent.innerHTML = `
         <div class="panel">
             <h2>Gestión de Productos</h2>
-            <button class="btn-primary" onclick="mostrarFormularioProducto()">
-                Agregar Nuevo Producto
-            </button>
-            <div id="lista-productos" class="productos-grid"></div>
+            <div class="section-actions">
+                <button onclick="mostrarFormularioProducto()" class="btn-accion">Agregar Producto</button>
+            </div>
+            <div class="productos-container">
+                <!-- Los productos se cargarán dinámicamente aquí -->
+                <div class="loading" id="loading-productos">Cargando productos...</div>
+            </div>
+        </div>
+    `;
+    
+    cargarProductos();
+}
+
+// Función para mostrar la sección de Hero
+function mostrarSeccionHero() {
+    console.log('Mostrando sección de Hero');
+    
+    const mainContent = document.getElementById('main-content');
+    
+    // Cargar datos del hero desde localStorage
+    let titulo = 'LA SUREÑA DECO';
+    let subtitulo = 'HOME, BAZAR Y REGALERÍA';
+    let imagenes = [];
+    
+    try {
+        // Intentar cargar desde heroData (forma actualizada)
+        const heroData = localStorage.getItem('heroData');
+        if (heroData) {
+            const data = JSON.parse(heroData);
+            titulo = data.titulo || titulo;
+            subtitulo = data.subtitulo || subtitulo;
+            
+            if (data.imagenes && Array.isArray(data.imagenes)) {
+                imagenes = data.imagenes.filter(img => img && (
+                    img.startsWith('data:image/') || 
+                    /^https?:\/\/.+/.test(img)
+                ));
+            }
+            console.log('Imágenes cargadas desde heroData:', imagenes.length);
+        } else {
+            // Intentar cargar imágenes del método antiguo como respaldo
+            const heroImagenes = localStorage.getItem('heroImagenes');
+            if (heroImagenes) {
+                imagenes = JSON.parse(heroImagenes || '[]');
+                console.log('Imágenes cargadas desde heroImagenes:', imagenes.length);
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar datos del hero:', error);
+    }
+    
+    mainContent.innerHTML = `
+        <div class="panel">
+            <h2>Editor de Hero</h2>
+            <div class="editor-container">
+                <div class="campo">
+                    <label for="heroTitulo">Título:</label>
+                    <input type="text" id="heroTitulo" value="${titulo}" class="input-field">
+                </div>
+                <div class="campo">
+                    <label for="heroSubtitulo">Subtítulo:</label>
+                    <input type="text" id="heroSubtitulo" value="${subtitulo}" class="input-field">
+                </div>
+                <div class="imagenes-hero">
+                    <h3>Imágenes del Hero (Máximo 3)</h3>
+                    <div class="hero-imagenes-grid">
+                        ${[0, 1, 2].map(index => `
+                            <div class="imagen-hero-container">
+                                <label>Imagen ${index + 1}:</label>
+                                <input type="file" id="heroFile${index}" accept="image/*" class="hero-file-input">
+                                <div class="preview-container">
+                                    <img src="${index < imagenes.length ? imagenes[index] : ''}" 
+                                         id="preview${index}" 
+                                         class="hero-preview" 
+                                         style="display: ${index < imagenes.length && imagenes[index] ? 'block' : 'none'}"
+                                         alt="Preview ${index + 1}">
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="acciones">
+                    <button onclick="guardarHero()" class="btn-guardar">Guardar Cambios</button>
+                </div>
+                <div id="mensajeTexto" class="mensaje" style="display: none;"></div>
+            </div>
         </div>
     `;
 
-    cargarProductos();
+    // Agregar eventos para previsualizar las imágenes
+    [0, 1, 2].forEach(index => {
+        const fileInput = document.getElementById(`heroFile${index}`);
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                const preview = document.getElementById(`preview${index}`);
+                if (this.files && this.files[0] && preview) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+        
+        // Mostrar las imágenes cargadas
+        if (index < imagenes.length && imagenes[index]) {
+            console.log(`Mostrando imagen ${index + 1} en preview`);
+        }
+    });
+}
+
+// Función para mostrar la sección de Texto Movimiento
+function mostrarSeccionTextoMovimiento() {
+    console.log('Mostrando sección de Texto Movimiento');
+    const mainContent = document.getElementById('main-content');
+    
+    // Obtener el texto actual del localStorage
+    let textoActual = '';
+    try {
+        const anuncios = localStorage.getItem('anuncios');
+        if (anuncios) {
+            const anunciosArray = JSON.parse(anuncios);
+            textoActual = anunciosArray.join('\n');
+        }
+    } catch (error) {
+        console.error('Error al cargar anuncios:', error);
+    }
+    
+    mainContent.innerHTML = `
+        <div class="panel">
+            <h2>Editor de Texto en Movimiento</h2>
+            <div class="editor-container">
+                <p class="instruccion">Ingresa cada anuncio en una línea separada. Se mostrarán en rotación en el banner superior.</p>
+                <div class="campo">
+                    <textarea id="textoMovimiento" rows="6" class="input-field" placeholder="Ejemplo: Envío gratis a partir de $80.000">${textoActual}</textarea>
+                </div>
+                <div class="ejemplo-banner">
+                    <h3>Vista previa:</h3>
+                    <div class="banner-preview">
+                        <div class="texto-movimiento-preview">${textoActual.split('\n')[0] || 'Sin anuncios configurados'}</div>
+                    </div>
+                </div>
+                <div class="acciones">
+                    <button onclick="guardarTextoMovimiento()" class="btn-guardar">Guardar Cambios</button>
+                </div>
+                <div id="mensajeAnuncios" class="mensaje" style="display: none;"></div>
+            </div>
+        </div>
+    `;
+    
+    // Actualizar vista previa cuando se edita el texto
+    const textarea = document.getElementById('textoMovimiento');
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            const lineas = this.value.split('\n').filter(linea => linea.trim() !== '');
+            const preview = document.querySelector('.texto-movimiento-preview');
+            if (preview) {
+                preview.textContent = lineas.length > 0 ? lineas[0] : 'Sin anuncios configurados';
+            }
+        });
+    }
+}
+
+// Función para guardar el texto en movimiento
+function guardarTextoMovimiento() {
+    const textarea = document.getElementById('textoMovimiento');
+    if (!textarea) return;
+    
+    const texto = textarea.value;
+    const anuncios = texto.split('\n')
+                         .map(linea => linea.trim())
+                         .filter(linea => linea !== '');
+    
+    try {
+        localStorage.setItem('anuncios', JSON.stringify(anuncios));
+        mostrarMensaje('mensajeAnuncios', 'Los anuncios se han guardado correctamente', 'success');
+    } catch (error) {
+        console.error('Error al guardar anuncios:', error);
+        mostrarMensaje('mensajeAnuncios', 'Error al guardar los anuncios', 'error');
+    }
+}
+
+// Función para mostrar mensajes
+function mostrarMensaje(elementId, texto, tipo) {
+    const mensajeElement = document.getElementById(elementId);
+    if (mensajeElement) {
+        mensajeElement.textContent = texto;
+        mensajeElement.className = `mensaje ${tipo}`;
+        mensajeElement.style.display = 'block';
+        
+        // Ocultar el mensaje después de 3 segundos
+        setTimeout(() => {
+            mensajeElement.style.display = 'none';
+        }, 3000);
+    }
 }
 
 // Función para mostrar sección
@@ -336,7 +525,7 @@ function mostrarSeccion(seccion) {
     } else if (seccion === 'banner') {
         editarBanner();
     } else if (seccion === 'hero') {
-        editarHero();
+        mostrarSeccionHero();
     } else if (seccion === 'anuncios') {
         editarAnuncios();
     } else if (seccion === 'historial') {
@@ -366,7 +555,7 @@ function configurarEventos() {
 
 // Función para cargar productos
 function cargarProductos() {
-    const productosContainer = document.querySelector('.productos-grid');
+    const productosContainer = document.querySelector('.productos-container');
     if (!productosContainer) return;
 
     productos = JSON.parse(localStorage.getItem('productos') || '[]');
@@ -405,191 +594,176 @@ function cargarProductos() {
 }
 
 // Función para mostrar el formulario de producto
-function mostrarFormularioProducto(id = null) {
-    const modal = document.getElementById('modal-producto');
-    const form = document.getElementById('formulario-producto');
+function mostrarFormularioProducto(productoId = null) {
+    const modalProducto = document.getElementById('modal-producto');
+    if (!modalProducto) return;
     
-    productoActual = id ? productos.find(p => p.id === id) : null;
+    // Limpiar el formulario
+    const formulario = document.getElementById('formulario-producto');
+    if (formulario) formulario.reset();
     
-    if (productoActual) {
-        // Modo edición
-        form.nombre.value = productoActual.nombre;
-        form.precio.value = productoActual.precio;
-        form.descripcion.value = productoActual.descripcion;
-        form.categoria.value = productoActual.categoria;
-        form.stock.value = productoActual.stock;
+    // Cargar categorías actualizadas
+    const categorias = JSON.parse(localStorage.getItem('categorias')) || ['MESA', 'DECORACIÓN', 'HOGAR', 'COCINA', 'BAÑO', 'AROMAS', 'REGALOS'];
+    
+    // Si se está editando un producto, cargar sus datos
+    if (productoId !== null) {
+        const productos = JSON.parse(localStorage.getItem('productos') || '[]');
+        const producto = productos.find(p => p.id === productoId);
         
-        // Mostrar imágenes existentes
-        if (productoActual.imagenes) {
-            productoActual.imagenes.forEach((imagen, index) => {
-                const preview = document.getElementById(`preview-${index + 1}`);
-                if (preview) {
-                    preview.src = imagen;
-                    preview.style.display = 'block';
-                }
-            });
-        }
-    } else {
-        // Modo nuevo producto
-        form.reset();
-        // Limpiar todas las previsualizaciones
-        for (let i = 1; i <= 5; i++) {
-            const preview = document.getElementById(`preview-${i}`);
-            if (preview) {
-                preview.style.display = 'none';
-                preview.src = '';
+        if (producto) {
+            document.getElementById('nombre').value = producto.nombre || '';
+            document.getElementById('precio').value = producto.precio || '';
+            document.getElementById('descripcion').value = producto.descripcion || '';
+            document.getElementById('categoria').value = producto.categoria || '';
+            document.getElementById('stock').value = producto.stock || 0;
+            
+            // Mostrar imágenes existentes
+            if (producto.imagenes && Array.isArray(producto.imagenes)) {
+                producto.imagenes.forEach((imagen, index) => {
+                    if (index < 5 && imagen) {
+                        const preview = document.getElementById(`preview-${index + 1}`);
+                        if (preview) {
+                            preview.src = imagen;
+                            preview.style.display = 'block';
+                        }
+                    }
+                });
             }
         }
     }
     
-    modal.style.display = 'block';
+    // Actualizar el select de categorías
+    const selectCategoria = document.getElementById('categoria');
+    if (selectCategoria) {
+        selectCategoria.innerHTML = categorias.map(categoria => 
+            `<option value="${categoria}">${categoria}</option>`
+        ).join('');
+    }
+    
+    // Establecer el ID del producto en un atributo data para uso posterior
+    formulario.setAttribute('data-producto-id', productoId || '');
+    
+    // Mostrar el modal
+    modalProducto.style.display = 'block';
 }
 
 // Función para guardar producto
 async function guardarProducto(event) {
     event.preventDefault();
     
-    const form = event.target;
-    let imagenes = [];
+    const formulario = document.getElementById('formulario-producto');
+    if (!formulario) return;
     
-    try {
-        // Limitar a máximo 5 imágenes y procesarlas con compresión
-        for (let i = 0; i < 5; i++) {
-            const input = form.querySelector(`input[type="file"][data-index="${i}"]`);
-            
-            if (input.files && input.files[0]) {
-                // Comprimir la imagen antes de guardarla
-                try {
-                    const imagenComprimida = await comprimirImagen(input.files[0]);
-                    if (imagenComprimida) {
-                        imagenes.push(imagenComprimida);
-                        console.log(`Imagen ${i+1} comprimida correctamente`);
-                    }
-                } catch (error) {
-                    console.error(`Error al comprimir la imagen ${i+1}:`, error);
-                }
-            } else if (productoActual && productoActual.imagenes && productoActual.imagenes[i]) {
-                // Mantener la imagen existente si no se seleccionó una nueva
-                imagenes.push(productoActual.imagenes[i]);
-            }
-            
-            // Si ya tenemos 5 imágenes, salir del bucle
-            if (imagenes.length >= 5) {
-                break;
-            }
-        }
-        
-        const producto = {
-            id: productoActual ? productoActual.id : Date.now(),
-            nombre: form.nombre.value,
-            precio: parseFloat(form.precio.value),
-            descripcion: form.descripcion.value,
-            categoria: form.categoria.value,
-            stock: parseInt(form.stock.value),
-            imagenes: imagenes
-        };
-        
-        try {
-            if (productoActual) {
-                // Actualizar producto existente
-                const index = productos.findIndex(p => p.id === productoActual.id);
-                productos[index] = producto;
-            } else {
-                // Agregar nuevo producto
-                productos.push(producto);
-            }
-            
-            // Guardar en localStorage con manejo de errores
-            localStorage.setItem('productos', JSON.stringify(productos));
-            cerrarModal();
-            cargarProductos();
-            
-            // Mostrar mensaje de éxito
-            alert('Producto guardado correctamente');
-        } catch (error) {
-            console.error('Error al guardar el producto:', error);
-            alert('Error al guardar el producto. El almacenamiento puede estar lleno.');
-            
-            // Intentar guardar sin imágenes como respaldo
-            try {
-                producto.imagenes = producto.imagenes.length > 0 ? [producto.imagenes[0]] : [];
-                
-                if (productoActual) {
-                    const index = productos.findIndex(p => p.id === productoActual.id);
-                    productos[index] = producto;
-                } else {
-                    productos.push(producto);
-                }
-                
-                localStorage.setItem('productos', JSON.stringify(productos));
-                cerrarModal();
-                cargarProductos();
-                
-                alert('Producto guardado con imagen reducida debido a limitaciones de almacenamiento');
-            } catch (fallbackError) {
-                console.error('Error al guardar con imagen reducida:', fallbackError);
-                alert('No se pudo guardar el producto ni siquiera con imagen reducida');
-            }
-        }
-    } catch (error) {
-        console.error('Error general al procesar el producto:', error);
-        alert('Error al procesar el producto. Por favor, intente nuevamente.');
+    const productoId = formulario.getAttribute('data-producto-id');
+    const nombre = document.getElementById('nombre').value;
+    const precio = parseFloat(document.getElementById('precio').value);
+    const descripcion = document.getElementById('descripcion').value;
+    const categoria = document.getElementById('categoria').value;
+    const stock = parseInt(document.getElementById('stock').value);
+    
+    // Validar campos
+    if (!nombre || isNaN(precio) || !descripcion || !categoria || isNaN(stock)) {
+        alert('Por favor, completa todos los campos correctamente.');
+        return;
     }
+    
+    // Recopilar imágenes
+    const imagenes = [];
+    for (let i = 0; i < 5; i++) {
+        const fileInput = document.querySelector(`input[data-index="${i}"]`);
+        const preview = document.getElementById(`preview-${i + 1}`);
+        
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            try {
+                const imagen = await comprimirImagen(fileInput.files[0]);
+                imagenes.push(imagen);
+            } catch (error) {
+                console.error(`Error al procesar imagen ${i + 1}:`, error);
+            }
+        } else if (preview && preview.style.display === 'block' && preview.src) {
+            imagenes.push(preview.src);
+        }
+    }
+    
+    // Obtener productos existentes
+    const productos = JSON.parse(localStorage.getItem('productos') || '[]');
+    
+    // Crear o actualizar producto
+    const producto = {
+        id: productoId ? parseInt(productoId) : Date.now(),
+        nombre,
+        precio,
+        descripcion,
+        categoria,
+        stock,
+        imagenes
+    };
+    
+    if (productoId) {
+        // Actualizar producto existente
+        const index = productos.findIndex(p => p.id === parseInt(productoId));
+        if (index !== -1) {
+            productos[index] = producto;
+        }
+    } else {
+        // Agregar nuevo producto
+        productos.push(producto);
+    }
+    
+    // Guardar en localStorage
+    localStorage.setItem('productos', JSON.stringify(productos));
+    
+    // Cerrar modal y recargar productos
+    cerrarModal();
+    cargarProductos();
 }
 
-// Función para comprimir imagen
-async function comprimirImagen(file) {
+// Función para comprimir una imagen
+function comprimirImagen(file) {
     return new Promise((resolve, reject) => {
-        try {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    try {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Calcular dimensiones manteniendo proporción
-                        let width = img.width;
-                        let height = img.height;
-                        const maxSize = 800; // Reducir tamaño máximo para ahorrar espacio
-                        
-                        if (width > height && width > maxSize) {
-                            height = (height * maxSize) / width;
-                            width = maxSize;
-                        } else if (height > maxSize) {
-                            width = (width * maxSize) / height;
-                            height = maxSize;
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        
-                        // Dibujar y comprimir
-                        ctx.drawImage(img, 0, 0, width, height);
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7); // Mayor compresión (0.7 en lugar de 0.8)
-                        
-                        resolve(dataUrl);
-                    } catch (error) {
-                        console.error('Error al procesar la imagen en canvas:', error);
-                        reject(error);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(event) {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Calcular dimensiones
+                let width = img.width;
+                let height = img.height;
+                const maxWidth = 1200;
+                const maxHeight = 800;
+                
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
                     }
-                };
-                img.onerror = function() {
-                    console.error('Error al cargar la imagen');
-                    reject(new Error('Error al cargar la imagen'));
-                };
-                img.src = e.target.result;
+                } else {
+                    if (height > maxHeight) {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Convertir a base64 con calidad reducida
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                resolve(compressedDataUrl);
             };
-            reader.onerror = function(error) {
-                console.error('Error al leer el archivo:', error);
-                reject(error);
+            img.onerror = function() {
+                reject(new Error('Error al cargar la imagen'));
             };
-            reader.readAsDataURL(file);
-        } catch (error) {
-            console.error('Error en comprimirImagen:', error);
-            reject(error);
-        }
+        };
+        reader.onerror = function() {
+            reject(new Error('Error al leer el archivo'));
+        };
     });
 }
 
@@ -604,9 +778,9 @@ function eliminarProducto(id) {
 
 // Función para cerrar el modal
 function cerrarModal() {
-    const modal = document.getElementById('modal-producto');
-    if (modal) {
-        modal.style.display = 'none';
+    const modalProducto = document.getElementById('modal-producto');
+    if (modalProducto) {
+        modalProducto.style.display = 'none';
         productoActual = null;
         
         // Limpiar el formulario y las previsualizaciones
@@ -699,64 +873,39 @@ function cargarSeccionProductos() {
 
 // Función para cambiar sección
 function cambiarSeccion(seccion) {
-    // Remover clase activa de todos los enlaces
-    document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+    console.log('Cambiando a sección:', seccion);
     
-    // Agregar clase activa al enlace seleccionado
-    const enlaceActivo = document.querySelector(`.sidebar nav a[data-section="${seccion}"]`);
-    if (enlaceActivo) enlaceActivo.classList.add('active');
+    // Primero, remover clase activa de todos los enlaces
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Agregar clase activa al enlace de la sección seleccionada
+    const enlaceActivo = document.querySelector(`.nav-link[data-section="${seccion}"]`);
+    if (enlaceActivo) {
+        enlaceActivo.classList.add('active');
+    }
     
     // Cargar el contenido de la sección
     switch(seccion) {
         case 'productos':
-            cargarSeccionProductos();
+            mostrarSeccionProductos();
+            break;
+        case 'categorias':
+            mostrarSeccionCategorias();
             break;
         case 'hero':
-            editarHero();
+            mostrarSeccionHero();
             break;
         case 'texto-movimiento':
             mostrarSeccionTextoMovimiento();
             break;
-    }
-}
-
-function mostrarSeccionTextoMovimiento() {
-    const mainContent = document.getElementById('main-content');
-    const textoGuardado = localStorage.getItem('textoMovimiento') || '';
-    
-    mainContent.innerHTML = `
-        <div class="seccion-texto-movimiento">
-            <h2>Texto en Movimiento</h2>
-            <div class="campo-texto-movimiento">
-                <p class="descripcion">Este texto aparecerá en movimiento en la línea beige de la página principal.</p>
-                <textarea id="textoMovimiento" rows="3" placeholder="Ingresa el texto para el banner en movimiento...">${textoGuardado}</textarea>
-                <button id="btnGuardarTexto" class="btn-guardar">Guardar Texto</button>
-                <div id="mensajeTexto" class="mensaje" style="display: none;"></div>
-            </div>
-            <div class="preview-banner">
-                <h3>Vista previa:</h3>
-                <div class="banner-preview">
-                    <div class="texto-movimiento-preview">${textoGuardado || '¡Bienvenidos a LA SUREÑA DECO! 🌟 Descuentos especiales en todos nuestros productos'}</div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Agregar evento al botón de guardar
-    const btnGuardarTexto = document.getElementById('btnGuardarTexto');
-    if (btnGuardarTexto) {
-        btnGuardarTexto.addEventListener('click', guardarTextoMovimiento);
-    }
-
-    // Agregar evento para actualizar la vista previa mientras se escribe
-    const textarea = document.getElementById('textoMovimiento');
-    if (textarea) {
-        textarea.addEventListener('input', function() {
-            const preview = document.querySelector('.texto-movimiento-preview');
-            if (preview) {
-                preview.textContent = this.value || '¡Bienvenidos a LA SUREÑA DECO! 🌟 Descuentos especiales en todos nuestros productos';
-            }
-        });
+        case 'pagos':
+            mostrarSeccionPagos();
+            break;
+        default:
+            console.error('Sección no reconocida:', seccion);
+            mostrarSeccionProductos(); // Por defecto, mostrar productos
     }
 }
 
@@ -793,8 +942,177 @@ function cargarTextoMovimiento() {
     }
 }
 
-function mostrarMensaje(texto, tipo) {
-    const mensajeElement = document.getElementById('mensajeTexto');
+// Función para mostrar la sección de configuración de pagos
+function mostrarSeccionPagos() {
+    console.log('Mostrando sección de configuración de pagos');
+    const mainContent = document.getElementById('main-content');
+    
+    // Cargar datos de configuración de pagos desde localStorage
+    let configPagos = {
+        mercadoPago: {
+            habilitado: false,
+            cuentaMP: '',
+            tokenAcceso: ''
+        },
+        tarjeta: {
+            habilitado: false,
+            titular: '',
+            banco: '',
+            numeroCuenta: ''
+        },
+        transferencia: {
+            habilitado: false,
+            titular: '',
+            banco: '',
+            numeroCuenta: '',
+            cbu: '',
+            alias: ''
+        }
+    };
+    
+    try {
+        const configGuardada = localStorage.getItem('configPagos');
+        if (configGuardada) {
+            configPagos = { ...configPagos, ...JSON.parse(configGuardada) };
+        }
+    } catch (error) {
+        console.error('Error al cargar configuración de pagos:', error);
+    }
+    
+    mainContent.innerHTML = `
+        <div class="panel">
+            <h2>Configuración de Métodos de Pago</h2>
+            <div class="config-pagos-container">
+                <!-- Mercado Pago -->
+                <div class="metodo-pago-card">
+                    <div class="metodo-header">
+                        <h3>
+                            <i class="fab fa-cc-visa"></i> Mercado Pago
+                        </h3>
+                        <label class="switch">
+                            <input type="checkbox" id="mp-habilitado" ${configPagos.mercadoPago.habilitado ? 'checked' : ''}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="metodo-form">
+                        <div class="campo">
+                            <label for="mp-cuenta">Email/Usuario de Mercado Pago:</label>
+                            <input type="text" id="mp-cuenta" class="input-field" value="${configPagos.mercadoPago.cuentaMP || ''}">
+                        </div>
+                        <div class="campo">
+                            <label for="mp-token">Token de Acceso:</label>
+                            <input type="password" id="mp-token" class="input-field" value="${configPagos.mercadoPago.tokenAcceso || ''}">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tarjeta de Crédito/Débito -->
+                <div class="metodo-pago-card">
+                    <div class="metodo-header">
+                        <h3>
+                            <i class="fas fa-credit-card"></i> Tarjetas
+                        </h3>
+                        <label class="switch">
+                            <input type="checkbox" id="tarjeta-habilitado" ${configPagos.tarjeta.habilitado ? 'checked' : ''}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="metodo-form">
+                        <div class="campo">
+                            <label for="tarjeta-titular">Nombre del Titular:</label>
+                            <input type="text" id="tarjeta-titular" class="input-field" value="${configPagos.tarjeta.titular || ''}">
+                        </div>
+                        <div class="campo">
+                            <label for="tarjeta-banco">Banco:</label>
+                            <input type="text" id="tarjeta-banco" class="input-field" value="${configPagos.tarjeta.banco || ''}">
+                        </div>
+                        <div class="campo">
+                            <label for="tarjeta-numero">Número de Cuenta (últimos 4 dígitos):</label>
+                            <input type="text" id="tarjeta-numero" class="input-field" maxlength="4" value="${configPagos.tarjeta.numeroCuenta || ''}">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Transferencia Bancaria -->
+                <div class="metodo-pago-card">
+                    <div class="metodo-header">
+                        <h3>
+                            <i class="fas fa-university"></i> Transferencia Bancaria
+                        </h3>
+                        <label class="switch">
+                            <input type="checkbox" id="transferencia-habilitado" ${configPagos.transferencia.habilitado ? 'checked' : ''}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="metodo-form">
+                        <div class="campo">
+                            <label for="transferencia-titular">Nombre del Titular:</label>
+                            <input type="text" id="transferencia-titular" class="input-field" value="${configPagos.transferencia.titular || ''}">
+                        </div>
+                        <div class="campo">
+                            <label for="transferencia-banco">Banco:</label>
+                            <input type="text" id="transferencia-banco" class="input-field" value="${configPagos.transferencia.banco || ''}">
+                        </div>
+                        <div class="campo">
+                            <label for="transferencia-cuenta">Número de Cuenta:</label>
+                            <input type="text" id="transferencia-cuenta" class="input-field" value="${configPagos.transferencia.numeroCuenta || ''}">
+                        </div>
+                        <div class="campo">
+                            <label for="transferencia-cbu">CBU:</label>
+                            <input type="text" id="transferencia-cbu" class="input-field" value="${configPagos.transferencia.cbu || ''}">
+                        </div>
+                        <div class="campo">
+                            <label for="transferencia-alias">Alias:</label>
+                            <input type="text" id="transferencia-alias" class="input-field" value="${configPagos.transferencia.alias || ''}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="botones-config">
+                    <button onclick="guardarConfiguracionPagos()" class="btn-guardar">Guardar Configuración</button>
+                </div>
+                <div id="mensaje-config-pagos" class="mensaje" style="display: none;"></div>
+            </div>
+        </div>
+    `;
+}
+
+// Función para guardar la configuración de pagos
+function guardarConfiguracionPagos() {
+    const configPagos = {
+        mercadoPago: {
+            habilitado: document.getElementById('mp-habilitado').checked,
+            cuentaMP: document.getElementById('mp-cuenta').value.trim(),
+            tokenAcceso: document.getElementById('mp-token').value.trim()
+        },
+        tarjeta: {
+            habilitado: document.getElementById('tarjeta-habilitado').checked,
+            titular: document.getElementById('tarjeta-titular').value.trim(),
+            banco: document.getElementById('tarjeta-banco').value.trim(),
+            numeroCuenta: document.getElementById('tarjeta-numero').value.trim()
+        },
+        transferencia: {
+            habilitado: document.getElementById('transferencia-habilitado').checked,
+            titular: document.getElementById('transferencia-titular').value.trim(),
+            banco: document.getElementById('transferencia-banco').value.trim(),
+            numeroCuenta: document.getElementById('transferencia-cuenta').value.trim(),
+            cbu: document.getElementById('transferencia-cbu').value.trim(),
+            alias: document.getElementById('transferencia-alias').value.trim()
+        }
+    };
+    
+    try {
+        localStorage.setItem('configPagos', JSON.stringify(configPagos));
+        mostrarMensajeConfigPagos('Configuración de pagos guardada correctamente', 'success');
+    } catch (error) {
+        console.error('Error al guardar configuración de pagos:', error);
+        mostrarMensajeConfigPagos('Error al guardar la configuración', 'error');
+    }
+}
+
+// Función para mostrar mensajes en la sección de configuración de pagos
+function mostrarMensajeConfigPagos(texto, tipo) {
+    const mensajeElement = document.getElementById('mensaje-config-pagos');
     if (mensajeElement) {
         mensajeElement.textContent = texto;
         mensajeElement.className = `mensaje ${tipo}`;
@@ -807,51 +1125,7 @@ function mostrarMensaje(texto, tipo) {
     }
 }
 
-function guardarTextoMovimiento() {
-    const textarea = document.getElementById('textoMovimiento');
-    const texto = textarea.value.trim();
-    
-    if (texto === '') {
-        mostrarMensaje('Por favor, ingresa un texto para el banner', 'error');
-        return;
-    }
-    
-    // Guardar el texto en localStorage
-    localStorage.setItem('textoMovimiento', texto);
-    
-    // Forzar una actualización en localStorage
-    const timestamp = Date.now();
-    localStorage.setItem('textoMovimientoTimestamp', timestamp);
-    
-    // Actualizar la vista previa
-    const preview = document.querySelector('.texto-movimiento-preview');
-    if (preview) {
-        preview.textContent = texto;
-    }
-    
-    // Disparar un evento personalizado
-    const event = new CustomEvent('textoMovimientoActualizado', { 
-        detail: { texto, timestamp } 
-    });
-    window.dispatchEvent(event);
-    
-    // Notificar a la página principal si está abierta
-    if (window.opener) {
-        window.opener.postMessage({
-            type: 'textoMovimientoActualizado',
-            texto: texto,
-            timestamp: timestamp
-        }, '*');
-    }
-    
-    // Forzar una actualización en localStorage para otras ventanas
-    const tempKey = 'temp_' + Date.now();
-    localStorage.setItem(tempKey, '1');
-    setTimeout(() => localStorage.removeItem(tempKey), 100);
-    
-    mostrarMensaje('Texto guardado exitosamente', 'success');
-}
-
+// Función para guardar el hero
 async function guardarHero() {
     const titulo = document.getElementById('heroTitulo').value;
     const subtitulo = document.getElementById('heroSubtitulo').value;
@@ -900,18 +1174,7 @@ async function guardarHero() {
         // Guardar solo en heroData
         localStorage.setItem('heroData', JSON.stringify(heroData));
         
-        // Limpiar los previews y inputs
-        for (let i = 0; i < 3; i++) {
-            const fileInput = document.getElementById(`heroFile${i}`);
-            const preview = document.getElementById(`preview${i}`);
-            if (fileInput) fileInput.value = '';
-            if (preview) {
-                preview.src = defaultImage;
-                preview.style.display = 'none';
-            }
-        }
-        
-        mostrarMensaje('Hero guardado exitosamente', 'success');
+        mostrarMensaje('mensajeTexto', 'Hero guardado exitosamente', 'success');
         
         // Notificar a la página principal
         if (window.opener) {
@@ -923,105 +1186,167 @@ async function guardarHero() {
         
     } catch (error) {
         console.error('Error al guardar el hero:', error);
-        mostrarMensaje('Error al guardar el hero: ' + error.message, 'error');
+        mostrarMensaje('mensajeTexto', 'Error al guardar el hero: ' + error.message, 'error');
     }
 }
 
-// Función para cargar el hero al iniciar
-function cargarHero() {
-    // Obtener datos del hero desde localStorage
-    let titulo = 'LA SUREÑA DECO';
-    let subtitulo = 'HOME, BAZAR Y REGALERÍA';
-    let imagenes = [];
+// Función para mostrar la sección de categorías
+function mostrarSeccionCategorias() {
+    console.log('Mostrando sección de categorías');
+    const mainContent = document.getElementById('main-content');
     
+    // Cargar categorías desde localStorage
+    let categorias = [];
     try {
-        // Intentar cargar desde heroData (forma actualizada)
-        const heroData = localStorage.getItem('heroData');
-        if (heroData) {
-            const data = JSON.parse(heroData);
-            titulo = data.titulo || titulo;
-            subtitulo = data.subtitulo || subtitulo;
-            
-            if (data.imagenes && Array.isArray(data.imagenes)) {
-                imagenes = data.imagenes.filter(img => img && (
-                    img.startsWith('data:image/') || 
-                    /^https?:\/\/.+/.test(img)
-                ));
-            }
-            console.log('Imágenes cargadas desde heroData:', imagenes.length);
+        const categoriasGuardadas = localStorage.getItem('categorias');
+        if (categoriasGuardadas) {
+            categorias = JSON.parse(categoriasGuardadas);
         } else {
-            // Intentar cargar imágenes del método antiguo como respaldo
-            const heroImagenes = localStorage.getItem('heroImagenes');
-            if (heroImagenes) {
-                imagenes = JSON.parse(heroImagenes);
-                console.log('Imágenes cargadas desde heroImagenes:', imagenes.length);
-            }
+            // Si no hay categorías guardadas, usar las predeterminadas
+            categorias = ['MESA', 'DECORACIÓN', 'HOGAR', 'COCINA', 'BAÑO', 'AROMAS', 'REGALOS'];
         }
     } catch (error) {
-        console.error('Error al cargar datos del hero:', error);
+        console.error('Error al cargar categorías:', error);
+        categorias = ['MESA', 'DECORACIÓN', 'HOGAR', 'COCINA', 'BAÑO', 'AROMAS', 'REGALOS'];
     }
     
-    // Actualizar los campos en la interfaz
-    const heroTituloInput = document.getElementById('heroTitulo');
-    const heroSubtituloInput = document.getElementById('heroSubtitulo');
-    
-    if (heroTituloInput) heroTituloInput.value = titulo;
-    if (heroSubtituloInput) heroSubtituloInput.value = subtitulo;
-    
-    // Actualizar las previsualizaciones de imágenes
-    for (let i = 0; i < 3; i++) {
-        const preview = document.getElementById(`preview${i}`);
-        if (preview) {
-            if (i < imagenes.length && imagenes[i]) {
-                preview.src = imagenes[i];
-                preview.style.display = 'block';
-                console.log(`Imagen ${i + 1} cargada:`, preview.src.substring(0, 50) + '...');
-            } else {
-                preview.style.display = 'none';
-            }
-        }
-    }
-    
-    console.log('Hero cargado con éxito');
+    mainContent.innerHTML = `
+        <div class="panel">
+            <h2>Gestión de Categorías</h2>
+            <div class="categorias-container">
+                <div class="categorias-header">
+                    <h3>Categorías Actuales</h3>
+                    <button onclick="mostrarFormularioCategoria()" class="btn-accion">
+                        <i class="fas fa-plus"></i> Agregar Categoría
+                    </button>
+                </div>
+                <div class="categorias-list">
+                    ${categorias.map((categoria, index) => `
+                        <div class="categoria-item">
+                            <span>${categoria}</span>
+                            <div class="categoria-actions">
+                                <button onclick="editarCategoria(${index})" class="btn-accion">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="eliminarCategoria(${index})" class="btn-accion">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
 }
 
-// Hacer las funciones disponibles globalmente
-window.mostrarFormularioProducto = mostrarFormularioProducto;
-window.guardarProducto = guardarProducto;
-window.eliminarProducto = eliminarProducto;
-window.cerrarModal = cerrarModal;
-window.previewImagen = previewImagen;
-window.previewImagenesAdicionales = previewImagenesAdicionales;
+// Función para mostrar el formulario de categoría
+function mostrarFormularioCategoria(categoriaIndex = null) {
+    const mainContent = document.getElementById('main-content');
+    const categorias = JSON.parse(localStorage.getItem('categorias')) || ['MESA', 'DECORACIÓN', 'HOGAR', 'COCINA', 'BAÑO', 'AROMAS', 'REGALOS'];
+    const categoria = categoriaIndex !== null ? categorias[categoriaIndex] : '';
+    
+    mainContent.innerHTML = `
+        <div class="panel">
+            <h2>${categoriaIndex !== null ? 'Editar' : 'Agregar'} Categoría</h2>
+            <div class="form-container">
+                <form id="form-categoria" onsubmit="guardarCategoria(event, ${categoriaIndex})">
+                    <div class="campo">
+                        <label for="nombre-categoria">Nombre de la Categoría:</label>
+                        <input type="text" id="nombre-categoria" class="input-field" value="${categoria}" required>
+                    </div>
+                    <div class="botones">
+                        <button type="submit" class="btn-guardar">Guardar</button>
+                        <button type="button" onclick="mostrarSeccionCategorias()" class="btn-cancelar">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+}
 
-// Agregar estilos
-const styles = document.createElement('style');
-styles.textContent = `
-    .panel {
-        padding: 20px;
-        background: white;
-        margin: 20px;
-        border-radius: 8px;
+// Función para guardar una categoría
+function guardarCategoria(event, categoriaIndex) {
+    event.preventDefault();
+    const nombreCategoria = document.getElementById('nombre-categoria').value.trim().toUpperCase();
+    
+    if (!nombreCategoria) {
+        mostrarMensaje('El nombre de la categoría no puede estar vacío', 'error');
+        return;
     }
-    .form-group {
-        margin: 20px 0;
+    
+    let categorias = JSON.parse(localStorage.getItem('categorias')) || ['MESA', 'DECORACIÓN', 'HOGAR', 'COCINA', 'BAÑO', 'AROMAS', 'REGALOS'];
+    
+    if (categoriaIndex !== null) {
+        // Editar categoría existente
+        categorias[categoriaIndex] = nombreCategoria;
+    } else {
+        // Agregar nueva categoría
+        if (categorias.includes(nombreCategoria)) {
+            mostrarMensaje('Esta categoría ya existe', 'error');
+            return;
+        }
+        categorias.push(nombreCategoria);
     }
-    .form-group input {
-        width: 300px;
-        padding: 5px;
-        margin-right: 10px;
+    
+    try {
+        // Guardar en localStorage
+        localStorage.setItem('categorias', JSON.stringify(categorias));
+        
+        // Notificar a todas las ventanas abiertas
+        window.postMessage({
+            type: 'categoriasUpdated',
+            categorias: categorias
+        }, '*');
+        
+        // Notificar a la ventana principal si existe
+        if (window.opener) {
+            window.opener.postMessage({
+                type: 'categoriasUpdated',
+                categorias: categorias
+            }, '*');
+        }
+        
+        mostrarMensaje(`Categoría ${categoriaIndex !== null ? 'editada' : 'agregada'} correctamente`, 'success');
+        mostrarSeccionCategorias();
+    } catch (error) {
+        console.error('Error al guardar categoría:', error);
+        mostrarMensaje('Error al guardar la categoría', 'error');
     }
-    .anuncio {
-        margin: 10px 0;
-        display: flex;
-        gap: 10px;
+}
+
+// Función para eliminar una categoría
+function eliminarCategoria(index) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
+        let categorias = JSON.parse(localStorage.getItem('categorias')) || ['MESA', 'DECORACIÓN', 'HOGAR', 'COCINA', 'BAÑO', 'AROMAS', 'REGALOS'];
+        categorias.splice(index, 1);
+        
+        try {
+            localStorage.setItem('categorias', JSON.stringify(categorias));
+            mostrarMensaje('Categoría eliminada correctamente', 'success');
+            mostrarSeccionCategorias();
+        } catch (error) {
+            console.error('Error al eliminar categoría:', error);
+            mostrarMensaje('Error al eliminar la categoría', 'error');
+        }
     }
-    .anuncio input {
-        width: 300px;
-        padding: 5px;
+}
+
+// Función para editar una categoría
+function editarCategoria(index) {
+    mostrarFormularioCategoria(index);
+}
+
+// Escuchar mensajes del panel de administración
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'categoriasUpdated') {
+        // Actualizar el select de categorías si está visible
+        const selectCategoria = document.getElementById('categoria');
+        if (selectCategoria) {
+            const categorias = event.data.categorias;
+            selectCategoria.innerHTML = categorias.map(categoria => 
+                `<option value="${categoria}">${categoria}</option>`
+            ).join('');
+        }
     }
-    button {
-        padding: 5px 10px;
-        cursor: pointer;
-    }
-`;
-document.head.appendChild(styles); 
+}); 

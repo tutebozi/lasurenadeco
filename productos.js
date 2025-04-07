@@ -1,7 +1,51 @@
 // Variables globales
 let productos = [];
 let imagenActualIndex = 0;
-const categorias = ['MESA', 'DECORACIÓN', 'HOGAR', 'COCINA', 'BAÑO', 'AROMAS', 'REGALOS'];
+let categorias = JSON.parse(localStorage.getItem('categorias')) || ['MESA', 'DECORACIÓN', 'HOGAR', 'COCINA', 'BAÑO', 'AROMAS', 'REGALOS'];
+
+// Escuchar mensajes del panel de administración
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'categoriasUpdated') {
+        console.log('Recibida actualización de categorías:', event.data.categorias);
+        categorias = event.data.categorias;
+        actualizarMenuCategorias();
+    }
+});
+
+// Función para actualizar el menú de categorías
+function actualizarMenuCategorias() {
+    console.log('Actualizando menú de categorías');
+    const nav = document.querySelector('nav ul');
+    if (!nav) {
+        console.error('No se encontró el elemento nav ul');
+        return;
+    }
+
+    // Limpiar el menú actual
+    nav.innerHTML = '';
+
+    // Agregar todas las categorías al menú
+    categorias.forEach(categoria => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = categoria;
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            filtrarPorCategoria(categoria);
+        });
+        li.appendChild(a);
+        nav.appendChild(li);
+    });
+
+    // Guardar las categorías actualizadas en localStorage
+    localStorage.setItem('categorias', JSON.stringify(categorias));
+}
+
+// Inicializar el menú de categorías al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarMenuCategorias();
+});
 
 // Función para cargar productos
 function cargarProductos() {
@@ -213,50 +257,6 @@ function filtrarPorCategoria(categoria) {
         contenedorProductos.appendChild(productoElement);
     });
 }
-
-// Función para inicializar los eventos de las categorías
-function inicializarEventosCategorias() {
-    const enlaces = document.querySelectorAll('nav ul li a');
-    enlaces.forEach(enlace => {
-        enlace.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            // Remover clase activa de todos los enlaces
-            enlaces.forEach(el => el.classList.remove('activo'));
-            // Agregar clase activa al enlace clickeado
-            e.target.classList.add('activo');
-            
-            const categoria = e.target.textContent.trim();
-            filtrarPorCategoria(categoria);
-        });
-    });
-
-    // Cargar todos los productos inicialmente
-    filtrarPorCategoria('TODOS');
-}
-
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    inicializarEventosCategorias();
-    
-    // Cerrar modal al hacer clic fuera
-    window.addEventListener('click', (e) => {
-        const modal = document.querySelector('.modal-producto');
-        if (e.target === modal) {
-            cerrarModalProducto();
-        }
-    });
-});
-
-// Hacer las funciones disponibles globalmente
-window.cargarProductos = cargarProductos;
-window.filtrarPorCategoria = filtrarPorCategoria;
-window.formatearPrecio = formatearPrecio;
-window.mostrarDetalleProducto = mostrarDetalleProducto;
-window.cambiarImagenPrincipal = cambiarImagenPrincipal;
-window.navegarImagen = navegarImagen;
-window.navegarImagenCard = navegarImagenCard;
-window.cerrarModalProducto = cerrarModalProducto;
 
 // Función para navegar entre imágenes en las cards
 function navegarImagenCard(productoId, direccion) {
