@@ -52,8 +52,12 @@ function cargarProductos() {
     const productosContainer = document.querySelector('.productos-container');
     if (!productosContainer) return;
 
-    // Obtener productos del localStorage
+    // Obtener productos y descuentos del localStorage
     productos = JSON.parse(localStorage.getItem('productos') || '[]');
+    const descuentos = JSON.parse(localStorage.getItem('descuentos')) || {
+        general: 0,
+        productos: {}
+    };
 
     // Limpiar el contenedor
     productosContainer.innerHTML = '';
@@ -65,10 +69,18 @@ function cargarProductos() {
             ? producto.imagenes[0] 
             : 'img/placeholder.jpg';
 
+        // Calcular descuento total (general + específico del producto)
+        const descuentoProducto = descuentos.productos[producto.id] || 0;
+        const descuentoTotal = Math.min(100, descuentos.general + descuentoProducto);
+        
+        // Calcular precio con descuento
+        const precioOriginal = producto.precio;
+        const precioConDescuento = precioOriginal * (1 - descuentoTotal / 100);
+
         const productoElement = document.createElement('div');
         productoElement.className = 'producto-card';
         productoElement.setAttribute('data-id', producto.id);
-        productoElement.setAttribute('data-imagen-index', '0'); // Inicializar índice de imagen
+        productoElement.setAttribute('data-imagen-index', '0');
         
         // Crear el indicador de puntos para imágenes múltiples
         let indicadorPuntos = '';
@@ -78,6 +90,7 @@ function cargarProductos() {
         
         productoElement.innerHTML = `
             <div class="producto-imagen" onclick="mostrarDetalleProducto(${producto.id})">
+                ${descuentoTotal > 0 ? `<span class="descuento-badge">-${descuentoTotal}% OFF</span>` : ''}
                 ${tieneMultiplesImagenes ? `<button class="flecha-card flecha-izquierda" onclick="event.stopPropagation(); navegarImagenCard(${producto.id}, -1)">❮</button>` : ''}
                 <img src="${imagenUrl}" alt="${producto.nombre}" loading="lazy" class="imagen-principal">
                 ${tieneMultiplesImagenes ? `<button class="flecha-card flecha-derecha" onclick="event.stopPropagation(); navegarImagenCard(${producto.id}, 1)">❯</button>` : ''}
@@ -85,7 +98,14 @@ function cargarProductos() {
             </div>
             <div class="producto-detalles">
                 <h3 class="producto-titulo">${producto.nombre}</h3>
-                <p class="producto-precio">$${formatearPrecio(producto.precio)}</p>
+                <div class="precio-container">
+                    ${descuentoTotal > 0 ? `
+                        <span class="precio-original">$${formatearPrecio(precioOriginal)}</span>
+                        <span class="precio-actual">$${formatearPrecio(precioConDescuento)}</span>
+                    ` : `
+                        <span class="precio-actual">$${formatearPrecio(precioOriginal)}</span>
+                    `}
+                </div>
                 <button class="btn-agregar" onclick="agregarAlCarrito(${producto.id})">
                     Agregar al carrito
                 </button>
@@ -98,61 +118,90 @@ function cargarProductos() {
 
 // Función para mostrar detalle del producto
 function mostrarDetalleProducto(productoId) {
+    const productos = JSON.parse(localStorage.getItem('productos')) || [];
     const producto = productos.find(p => p.id === productoId);
+    const descuentos = JSON.parse(localStorage.getItem('descuentos')) || {
+        general: 0,
+        productos: {}
+    };
+
     if (!producto) {
-        console.error('Producto no encontrado:', productoId);
+        console.error('Producto no encontrado');
         return;
     }
 
-    imagenActualIndex = 0;
-    const modalProducto = document.getElementById('modal-producto');
-    const modalContenido = modalProducto.querySelector('.modal-contenido');
+    // Calcular descuento total (general + específico del producto)
+    const descuentoProducto = descuentos.productos[producto.id] || 0;
+    const descuentoTotal = Math.min(100, descuentos.general + descuentoProducto);
     
-    const tieneMultiplesImagenes = producto.imagenes && producto.imagenes.length > 1;
-    
-    modalContenido.innerHTML = `
-        <div class="producto-imagenes-carousel">
-            <div class="imagen-principal-container">
-                ${tieneMultiplesImagenes ? `<button class="flecha-navegacion flecha-izquierda" onclick="navegarImagen(-1)">❮</button>` : ''}
-                <img src="${producto.imagenes && producto.imagenes.length > 0 ? producto.imagenes[0] : 'img/placeholder.jpg'}" 
-                    alt="${producto.nombre}" loading="lazy">
-                ${tieneMultiplesImagenes ? `<button class="flecha-navegacion flecha-derecha" onclick="navegarImagen(1)">❯</button>` : ''}
+    // Calcular precio con descuento
+    const precioOriginal = producto.precio;
+    const precioConDescuento = precioOriginal * (1 - descuentoTotal / 100);
+
+    const modal = document.getElementById('modal-producto');
+    const modalContent = document.querySelector('.modal-content');
+
+    modalContent.innerHTML = `
+        <span class="cerrar-modal">&times;</span>
+        <div class="detalle-producto">
+            <div class="galeria-producto">
+                ${producto.imagenes && producto.imagenes.length > 0 ? `
+                    <div class="imagen-principal-container">
+                        <button class="flecha izquierda" onclick="navegarImagen(-1)">❮</button>
+                        <img src="${producto.imagenes[0]}" alt="${producto.nombre}" class="imagen-principal">
+                        <button class="flecha derecha" onclick="navegarImagen(1)">❯</button>
+                    </div>
+                    <div class="miniaturas">
+                        ${producto.imagenes.map((img, index) => `
+                            <img src="${img}" alt="Miniatura ${index + 1}" 
+                                class="miniatura ${index === 0 ? 'activa' : ''}"
+                                onclick="cambiarImagenPrincipal(${index})">
+                        `).join('')}
+                    </div>
+                ` : `
+                    <img src="${producto.imagen || 'img/placeholder.jpg'}" alt="${producto.nombre}" class="imagen-principal">
+                `}
             </div>
-            ${tieneMultiplesImagenes ? `
-            <div class="imagenes-miniaturas">
-                ${producto.imagenes && producto.imagenes.map((imagen, index) => `
-                    <img src="${imagen}" 
-                         alt="${producto.nombre} - Imagen ${index + 1}" 
-                         class="${index === 0 ? 'activa' : ''}"
-                         loading="lazy"
-                         onclick="cambiarImagenPrincipal(this.src, ${index})">
-                `).join('')}
+            <div class="info-producto">
+                <h2>${producto.nombre}</h2>
+                <div class="precio-container">
+                    ${descuentoTotal > 0 ? `
+                        <span class="precio-original">$${formatearPrecio(precioOriginal)}</span>
+                        <span class="precio-actual">$${formatearPrecio(precioConDescuento)}</span>
+                    ` : `
+                        <span class="precio-actual">$${formatearPrecio(precioOriginal)}</span>
+                    `}
+                </div>
+                <p class="descripcion">${producto.descripcion || 'Sin descripción disponible'}</p>
+                <div class="controles-cantidad">
+                    <button onclick="ajustarCantidad(-1)">-</button>
+                    <input type="number" id="cantidad" value="1" min="1" onchange="validarCantidad(this)">
+                    <button onclick="ajustarCantidad(1)">+</button>
+                </div>
+                <button class="btn-agregar" onclick="agregarAlCarritoDesdeModal(${producto.id})">
+                    Agregar al carrito
+                </button>
             </div>
-            ` : ''}
-        </div>
-        <div class="producto-info">
-            <span class="cerrar" onclick="cerrarModalProducto()">&times;</span>
-            <h2>${producto.nombre}</h2>
-            <p class="precio">$${formatearPrecio(producto.precio)}</p>
-            <p class="descripcion">${producto.descripcion || ''}</p>
-            <p class="categoria">Categoría: ${producto.categoria || ''}</p>
-            <p class="stock">Stock: ${producto.stock || 0} unidades</p>
-            <button onclick="agregarAlCarrito(${producto.id})">
-                Agregar al carrito
-            </button>
         </div>
     `;
 
-    // Mostrar el modal con una animación suave
-    modalProducto.style.display = 'block';
-    setTimeout(() => modalProducto.style.opacity = '1', 10);
+    // Guardar el producto actual y sus imágenes en variables globales
+    window.productoActual = producto;
+    window.imagenActualIndex = 0;
 
-    // Configurar el cierre del modal
-    modalProducto.onclick = (e) => {
-        if (e.target === modalProducto) {
-            cerrarModalProducto();
+    modal.style.display = "block";
+
+    // Cerrar modal al hacer clic en la X o fuera del modal
+    const span = document.getElementsByClassName("cerrar-modal")[0];
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
         }
-    };
+    }
 }
 
 // Función para navegar entre imágenes
@@ -180,13 +229,6 @@ function cambiarImagenPrincipal(nuevaImagen, index) {
     });
 }
 
-// Función para cerrar el modal
-function cerrarModalProducto() {
-    const modalProducto = document.getElementById('modal-producto');
-    modalProducto.style.opacity = '0';
-    setTimeout(() => modalProducto.style.display = 'none', 300);
-}
-
 // Función para formatear precio
 function formatearPrecio(precio) {
     return new Intl.NumberFormat('es-CL').format(precio || 0);
@@ -197,6 +239,10 @@ function filtrarPorCategoria(categoria) {
     console.log('Filtrando por categoría:', categoria);
     const contenedorProductos = document.querySelector('.productos-container');
     const productos = JSON.parse(localStorage.getItem('productos')) || [];
+    const descuentos = JSON.parse(localStorage.getItem('descuentos')) || {
+        general: 0,
+        productos: {}
+    };
     
     // Filtrar productos por la categoría seleccionada
     const productosFiltrados = categoria === 'TODOS' ? 
@@ -234,12 +280,21 @@ function filtrarPorCategoria(categoria) {
 
         const tieneMultiplesImagenes = producto.imagenes && producto.imagenes.length > 1;
 
+        // Calcular descuento total (general + específico del producto)
+        const descuentoProducto = descuentos.productos[producto.id] || 0;
+        const descuentoTotal = Math.min(100, descuentos.general + descuentoProducto);
+        
+        // Calcular precio con descuento
+        const precioOriginal = producto.precio;
+        const precioConDescuento = precioOriginal * (1 - descuentoTotal / 100);
+
         const productoElement = document.createElement('div');
         productoElement.className = 'producto-card';
         productoElement.onclick = () => mostrarDetalleProducto(producto.id);
 
         productoElement.innerHTML = `
             <div class="producto-imagen">
+                ${descuentoTotal > 0 ? `<span class="descuento-badge">-${descuentoTotal}% OFF</span>` : ''}
                 ${tieneMultiplesImagenes ? `<button class="flecha-card flecha-izquierda" onclick="event.stopPropagation(); navegarImagenCard(${producto.id}, -1)">❮</button>` : ''}
                 <img src="${imagenPrincipal}" alt="${producto.nombre}" class="imagen-principal" loading="lazy">
                 ${tieneMultiplesImagenes ? `<button class="flecha-card flecha-derecha" onclick="event.stopPropagation(); navegarImagenCard(${producto.id}, 1)">❯</button>` : ''}
@@ -247,7 +302,14 @@ function filtrarPorCategoria(categoria) {
             </div>
             <div class="producto-detalles">
                 <h3>${producto.nombre}</h3>
-                <p class="producto-precio">$${formatearPrecio(producto.precio)}</p>
+                <div class="precio-container">
+                    ${descuentoTotal > 0 ? `
+                        <span class="precio-original">$${formatearPrecio(precioOriginal)}</span>
+                        <span class="precio-actual">$${formatearPrecio(precioConDescuento)}</span>
+                    ` : `
+                        <span class="precio-actual">$${formatearPrecio(precioOriginal)}</span>
+                    `}
+                </div>
                 <button class="btn-agregar" onclick="event.stopPropagation(); agregarAlCarrito(${producto.id})">
                     Agregar al carrito
                 </button>
@@ -290,4 +352,105 @@ function navegarImagenCard(productoId, direccion) {
         puntos[nuevoIndice] = '◉';
         indicador.textContent = puntos.join(' ');
     }
-} 
+}
+
+// Función para aplicar descuentos a los productos
+function aplicarDescuentos() {
+    const descuentos = JSON.parse(localStorage.getItem('descuentos')) || {
+        general: 0,
+        productos: {}
+    };
+
+    const productosContainer = document.querySelector('.productos-container');
+    if (!productosContainer) return;
+
+    const productos = JSON.parse(localStorage.getItem('productos')) || [];
+    
+    productosContainer.innerHTML = productos.map(producto => {
+        // Calcular descuento total (general + específico del producto)
+        const descuentoProducto = descuentos.productos[producto.id] || 0;
+        const descuentoTotal = Math.min(100, descuentos.general + descuentoProducto);
+        
+        // Calcular precio con descuento
+        const precioOriginal = producto.precio;
+        const precioConDescuento = precioOriginal * (1 - descuentoTotal / 100);
+        
+        return `
+            <div class="producto-card">
+                <div class="producto-imagen">
+                    <img src="${producto.imagenes[0]}" alt="${producto.nombre}">
+                </div>
+                <div class="producto-info">
+                    <h3>${producto.nombre}</h3>
+                    <div class="precio-container">
+                        ${descuentoTotal > 0 ? `
+                            <span class="precio-original">$${formatearPrecio(precioOriginal)}</span>
+                            <span class="precio-actual">$${formatearPrecio(precioConDescuento)}</span>
+                        ` : `
+                            <span class="precio-actual">$${formatearPrecio(precioOriginal)}</span>
+                        `}
+                    </div>
+                    <button onclick="agregarAlCarrito(${producto.id})">Agregar al carrito</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Escuchar actualizaciones de descuentos
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'descuentosUpdated') {
+        // Actualizar los descuentos en localStorage
+        localStorage.setItem('descuentos', JSON.stringify(event.data.descuentos));
+        
+        // Aplicar el nuevo color del badge
+        if (event.data.css) {
+            let styleElement = document.getElementById('descuento-badge-style');
+            if (!styleElement) {
+                styleElement = document.createElement('style');
+                styleElement.id = 'descuento-badge-style';
+                document.head.appendChild(styleElement);
+            }
+            styleElement.textContent = event.data.css;
+        }
+        
+        // Actualizar la visualización de los productos
+        cargarProductos();
+    }
+});
+
+// Aplicar el color del badge al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    const descuentos = JSON.parse(localStorage.getItem('descuentos')) || {
+        general: 0,
+        productos: {},
+        badgeColor: '#c41e3a'
+    };
+
+    // Crear el estilo CSS para el badge
+    const css = `
+        .descuento-badge {
+            background-color: ${descuentos.badgeColor} !important;
+            color: white !important;
+            padding: 4px 8px !important;
+            border-radius: 4px !important;
+            position: absolute !important;
+            top: 10px !important;
+            right: 10px !important;
+            font-weight: bold !important;
+            font-size: 14px !important;
+            z-index: 2 !important;
+        }
+    `;
+
+    let styleElement = document.getElementById('descuento-badge-style');
+    if (!styleElement) {
+        styleElement = document.createElement('style');
+        styleElement.id = 'descuento-badge-style';
+        document.head.appendChild(styleElement);
+    }
+    styleElement.textContent = css;
+
+    // Cargar productos con los descuentos aplicados
+    cargarProductos();
+}); 

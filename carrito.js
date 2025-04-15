@@ -126,14 +126,8 @@ function agregarAlCarrito(productoId) {
             // Obtener la imagen de forma segura
             let imagen = '';
             if (producto.imagenes && Array.isArray(producto.imagenes) && producto.imagenes.length > 0) {
-                // Asegurarse de que la imagen sea válida
-                for (let img of producto.imagenes) {
-                    if (img && (img.startsWith('data:image/') || img.startsWith('http'))) {
-                        imagen = img;
-                        break;
-                    }
-                }
-            } else if (producto.imagen && (producto.imagen.startsWith('data:image/') || producto.imagen.startsWith('http'))) {
+                imagen = producto.imagenes[0];
+            } else if (producto.imagen) {
                 imagen = producto.imagen;
             }
             
@@ -147,7 +141,8 @@ function agregarAlCarrito(productoId) {
                 nombre: producto.nombre || 'Producto sin nombre',
                 precio: producto.precio || 0,
                 imagen: imagen,
-                cantidad: 1
+                cantidad: 1,
+                productoId: producto.id // Guardamos el ID del producto para poder recuperar la imagen después
             });
         }
         
@@ -262,14 +257,28 @@ function actualizarCarrito() {
         
         // Generar el HTML de los items
         contenedor.innerHTML = '';
+        
+        // Obtener productos actualizados para las imágenes
+        const productos = JSON.parse(localStorage.getItem('productos') || '[]');
+        
         carrito.forEach(item => {
+            // Intentar obtener la imagen actualizada del producto
+            const productoActual = productos.find(p => p.id === item.productoId);
+            let imagenActualizada = item.imagen;
+            
+            if (productoActual && productoActual.imagenes && productoActual.imagenes.length > 0) {
+                imagenActualizada = productoActual.imagenes[0];
+            } else if (productoActual && productoActual.imagen) {
+                imagenActualizada = productoActual.imagen;
+            }
+            
             const itemElement = document.createElement('div');
             itemElement.className = 'carrito-item';
             itemElement.dataset.id = item.id;
             
             // Imagen con manejo de errores
             const imagen = document.createElement('img');
-            imagen.src = item.imagen;
+            imagen.src = imagenActualizada;
             imagen.alt = item.nombre;
             imagen.className = 'carrito-item-imagen';
             imagen.onerror = function() {
@@ -351,8 +360,19 @@ function formatearPrecio(precio) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Inicializando carrito...');
     
-    // Cargar carrito desde localStorage
+    // Cargar carrito desde localStorage y actualizar imágenes
     carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    
+    // Actualizar imágenes del carrito con los productos actuales
+    const productos = JSON.parse(localStorage.getItem('productos') || '[]');
+    carrito.forEach(item => {
+        const producto = productos.find(p => p.id === item.productoId);
+        if (producto && producto.imagenes && producto.imagenes.length > 0) {
+            item.imagen = producto.imagenes[0];
+        } else if (producto && producto.imagen) {
+            item.imagen = producto.imagen;
+        }
+    });
     
     // Actualizar contador
     actualizarContadorCarrito();
