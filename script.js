@@ -262,142 +262,61 @@ function validarURL(url) {
 }
 
 // Estado global del carrusel
-let carouselState = {
-    interval: null,
+const carouselState = {
+    defaultImage: '/lasurenadeco/img/placeholder.jpg',
     currentSlide: 0,
-    isLoading: false,
-    isTransitioning: false,
-    defaultImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzhiNzM1NSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5MQSBTVVJF0UEgREVDTzwvdGV4dD48L3N2Zz4='
+    slides: [],
+    autoplayInterval: null
 };
 
+// Función para cargar el hero
 function cargarHero() {
-    // Evitar cargar si ya está en proceso
-    if (carouselState.isLoading) {
-        console.log('Carga del hero en progreso, ignorando solicitud');
+    console.log('Imágenes a cargar en el hero:', 1);
+    const heroData = {
+        slides: [
+            {
+                imagen: '/lasurenadeco/img/hero1.jpg',
+                titulo: 'Bienvenidos a LA SUREÑA DECO',
+                subtitulo: 'Descubre nuestra colección'
+            }
+        ]
+    };
+
+    const heroSlides = document.querySelector('.hero-slides');
+    const heroDots = document.querySelector('.hero-dots');
+    
+    if (!heroSlides || !heroDots) {
+        console.error('No se encontraron los elementos del hero');
         return;
     }
-    
-    carouselState.isLoading = true;
-    console.log('Iniciando carga del hero');
 
-    try {
-        // Detener el carrusel existente
-        if (carouselState.interval) {
-            clearInterval(carouselState.interval);
-            carouselState.interval = null;
-            console.log('Intervalo anterior del carrusel detenido');
-        }
+    // Limpiar contenedores
+    heroSlides.innerHTML = '';
+    heroDots.innerHTML = '';
 
-        // Obtener datos del hero - Solo necesitamos las imágenes
-        let imagenes = [];
+    // Crear slides
+    heroData.slides.forEach((slide, index) => {
+        console.log('Creando slide', index + 1);
+        const slideDiv = document.createElement('div');
+        slideDiv.className = 'hero-slide' + (index === 0 ? ' active' : '');
+        slideDiv.innerHTML = `
+            <img src="${slide.imagen}" alt="Hero imagen ${index + 1}" 
+                 onerror="this.onerror=null; this.src='${carouselState.defaultImage}';">
+            <div class="hero-text">
+                <h2>${slide.titulo}</h2>
+                <p>${slide.subtitulo}</p>
+            </div>
+        `;
+        heroSlides.appendChild(slideDiv);
 
-        // Intentar cargar desde heroData (forma actualizada)
-        const heroData = localStorage.getItem('heroData');
+        // Crear punto de navegación
+        const dot = document.createElement('span');
+        dot.className = 'hero-dot' + (index === 0 ? ' active' : '');
+        dot.onclick = () => cambiarSlide(index);
+        heroDots.appendChild(dot);
+    });
 
-        if (heroData) {
-            try {
-                const data = JSON.parse(heroData);
-                
-                if (data.imagenes && Array.isArray(data.imagenes)) {
-                    imagenes = data.imagenes.filter(img => img && validarURL(img));
-                    console.log(`Filtradas ${imagenes.length} imágenes válidas de heroData`);
-                }
-            } catch (e) {
-                console.error('Error al parsear heroData:', e);
-            }
-        } else {
-            console.log('No se encontró heroData, buscando en heroImagenes');
-            // Intentar cargar del método antiguo como respaldo
-            try {
-                const heroImagenes = localStorage.getItem('heroImagenes');
-                if (heroImagenes) {
-                    const imagenesAntiguas = JSON.parse(heroImagenes);
-                    if (Array.isArray(imagenesAntiguas) && imagenesAntiguas.length > 0) {
-                        imagenes = imagenesAntiguas.filter(img => img && validarURL(img));
-                        console.log(`Recuperadas ${imagenes.length} imágenes desde heroImagenes`);
-                    }
-                }
-            } catch (error) {
-                console.error('Error al recuperar imágenes antiguas:', error);
-            }
-        }
-
-        // Si no hay imágenes válidas, usar imagen por defecto
-        if (imagenes.length === 0) {
-            console.log('No se encontraron imágenes válidas, usando imagen por defecto');
-            imagenes = [carouselState.defaultImage];
-        }
-
-        console.log(`Imágenes a cargar en el hero: ${imagenes.length}`);
-
-        // Actualizar el DOM
-        const heroSlides = document.querySelector('.hero-slides');
-        const heroDots = document.querySelector('.hero-dots');
-
-        // Ocultar el título y subtítulo del hero
-        const heroContent = document.querySelector('.hero-content');
-        if (heroContent) {
-            heroContent.style.display = 'none';
-        }
-
-        if (heroSlides) {
-            heroSlides.innerHTML = '';
-            
-            // Crear los slides para cada imagen
-            imagenes.forEach((imagen, index) => {
-                const slide = document.createElement('div');
-                slide.className = `hero-slide ${index === 0 ? 'active' : ''}`;
-                slide.style.transform = `translateX(${index === 0 ? 0 : 100}%)`;
-                
-                const img = document.createElement('img');
-                img.alt = `Hero imagen ${index + 1}`;
-                
-                // Manejar errores de carga de imagen
-                img.onerror = function() {
-                    console.error(`Error al cargar imagen ${index + 1}, usando imagen por defecto`);
-                    this.onerror = null; // Prevenir bucle infinito
-                    if (validarURL(carouselState.defaultImage)) {
-                        this.src = carouselState.defaultImage;
-                    }
-                };
-                
-                // Asignar src después de configurar onerror
-                if (validarURL(imagen)) {
-                    img.src = imagen;
-                } else {
-                    console.error(`URL de imagen inválida para slide ${index + 1}, usando imagen por defecto`);
-                    img.src = carouselState.defaultImage;
-                }
-                
-                slide.appendChild(img);
-                heroSlides.appendChild(slide);
-                console.log(`Slide ${index + 1} creado`);
-            });
-        } else {
-            console.error('No se encontró el contenedor .hero-slides');
-        }
-
-        // Iniciar el carrusel si hay más de una imagen
-        if (imagenes.length > 1) {
-            carouselState.currentSlide = 0;
-            iniciarCarruselDirecto(imagenes.length);
-        }
-
-    } catch (error) {
-        console.error('Error al cargar el hero:', error);
-        const heroSlides = document.querySelector('.hero-slides');
-        if (heroSlides) {
-            heroSlides.innerHTML = `
-                <div class="hero-slide active">
-                    <img src="${carouselState.defaultImage}" alt="Hero imagen por defecto" onerror="this.style.display='none'">
-                </div>
-            `;
-            console.log('Fallback de imagen por defecto aplicado');
-        }
-    } finally {
-        carouselState.isLoading = false;
-        console.log('Carga del hero completada');
-    }
+    console.log('Carga del hero completada');
 }
 
 // Función para iniciar el carrusel con efecto suave de deslizamiento
