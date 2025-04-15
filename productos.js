@@ -2,6 +2,7 @@
 let productos = [];
 let imagenActualIndex = 0;
 let categorias = JSON.parse(localStorage.getItem('categorias')) || ['MESA', 'DECORACIÓN', 'HOGAR', 'COCINA', 'BAÑO', 'AROMAS', 'REGALOS'];
+let productosInicializados = false;
 
 // Escuchar mensajes del panel de administración
 window.addEventListener('message', function(event) {
@@ -59,6 +60,12 @@ function cargarProductos() {
         productos: {}
     };
 
+    // Si no hay productos, mostrar mensaje
+    if (productos.length === 0) {
+        productosContainer.innerHTML = '<p class="no-productos">No hay productos disponibles</p>';
+        return;
+    }
+
     // Limpiar el contenedor
     productosContainer.innerHTML = '';
 
@@ -67,7 +74,7 @@ function cargarProductos() {
         const tieneMultiplesImagenes = producto.imagenes && producto.imagenes.length > 1;
         const imagenUrl = producto.imagenes && producto.imagenes.length > 0 
             ? producto.imagenes[0] 
-            : 'img/placeholder.jpg';
+            : '/lasurenadeco/img/placeholder.svg';
 
         // Calcular descuento total (general + específico del producto)
         const descuentoProducto = descuentos.productos[producto.id] || 0;
@@ -92,7 +99,8 @@ function cargarProductos() {
             <div class="producto-imagen" onclick="mostrarDetalleProducto(${producto.id})">
                 ${descuentoTotal > 0 ? `<span class="descuento-badge">-${descuentoTotal}% OFF</span>` : ''}
                 ${tieneMultiplesImagenes ? `<button class="flecha-card flecha-izquierda" onclick="event.stopPropagation(); navegarImagenCard(${producto.id}, -1)">❮</button>` : ''}
-                <img src="${imagenUrl}" alt="${producto.nombre}" loading="lazy" class="imagen-principal">
+                <img src="${imagenUrl}" alt="${producto.nombre}" loading="lazy" class="imagen-principal" 
+                     onerror="this.onerror=null; this.src='/lasurenadeco/img/placeholder.svg';">
                 ${tieneMultiplesImagenes ? `<button class="flecha-card flecha-derecha" onclick="event.stopPropagation(); navegarImagenCard(${producto.id}, 1)">❯</button>` : ''}
                 ${tieneMultiplesImagenes ? `<div class="indicador-imagenes">${indicadorPuntos}</div>` : ''}
             </div>
